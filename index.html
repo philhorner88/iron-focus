@@ -32,7 +32,7 @@
         .animate-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        input, select { font-size: 16px !important; } /* Prevents iOS zoom on focus */
+        input, select { font-size: 16px !important; }
     </style>
 </head>
 <body>
@@ -50,13 +50,10 @@
         const Plus = (p) => <Icon {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></Icon>;
         const Trash2 = (p) => <Icon {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></Icon>;
         const Dumbbell = (p) => <Icon {...p}><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M8.5 6.5v11M15.5 6.5v11"/></Icon>;
-        const Timer = (p) => <Icon {...p}><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/></Icon>;
-        const TimerIcon = Timer;
+        const TimerIcon = (p) => <Icon {...p}><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/></Icon>;
         const CheckCircle2 = (p) => <Icon {...p}><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></Icon>;
         const Circle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/></Icon>;
-        const BarChart3 = (p) => <Icon {...p}><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></Icon>;
         const HistoryIcon = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/></Icon>;
-        const History = HistoryIcon;
         const ClipboardList = (p) => <Icon {...p}><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="16" x2="16" y2="16"/></Icon>;
         const X = (p) => <Icon {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
         const SkipForward = (p) => <Icon {...p}><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></Icon>;
@@ -96,7 +93,6 @@
         const createNewSet = (target = "10") => ({ id: Math.random().toString(36).substr(2, 9), targetReps: target, actualReps: "", weight: "" });
 
         function App() {
-            // --- Global State ---
             const [activeTab, setActiveTab] = React.useState('program');
             const [isAudioEnabled, setIsAudioEnabled] = React.useState(true);
             const [expandedDay, setExpandedDay] = React.useState(null);
@@ -104,7 +100,6 @@
             const [bulkTarget, setBulkTarget] = React.useState('active');
             const [bulkInput, setBulkInput] = React.useState("");
             
-            // Persistence
             const [exercises, setExercises] = React.useState(() => JSON.parse(localStorage.getItem('if_ex_v6')) || []);
             const [history, setHistory] = React.useState(() => JSON.parse(localStorage.getItem('if_hist_v6')) || []);
             const [planner, setPlanner] = React.useState(() => JSON.parse(localStorage.getItem('if_plan_v6')) || 
@@ -112,14 +107,12 @@
             const [benchmarks, setBenchmarks] = React.useState(() => JSON.parse(localStorage.getItem('if_bench_v6')) || {});
             const [timerSettings, setTimerSettings] = React.useState(() => JSON.parse(localStorage.getItem('if_time_v6')) || { work: 45, restSet: 60, restExercise: 120, prep: 10 });
 
-            // Timer Engine
             const [timeLeft, setTimeLeft] = React.useState(timerSettings.prep);
             const [isActive, setIsActive] = React.useState(false);
             const [timerMode, setTimerMode] = React.useState('PREP');
             const [currentExIdx, setCurrentExIdx] = React.useState(0);
             const [currentCycle, setCurrentCycle] = React.useState(1);
 
-            // Wake Lock
             const wakeLock = React.useRef(null);
             const requestWakeLock = async () => {
                 if ('wakeLock' in navigator) {
@@ -127,7 +120,6 @@
                 }
             };
 
-            // Speech
             const speak = React.useCallback((text) => {
                 if (!isAudioEnabled) return;
                 const ut = new SpeechSynthesisUtterance(text);
@@ -136,7 +128,6 @@
                 window.speechSynthesis.speak(ut);
             }, [isAudioEnabled]);
 
-            // Save to Storage
             React.useEffect(() => {
                 localStorage.setItem('if_ex_v6', JSON.stringify(exercises));
                 localStorage.setItem('if_hist_v6', JSON.stringify(history));
@@ -145,7 +136,6 @@
                 localStorage.setItem('if_time_v6', JSON.stringify(timerSettings));
             }, [exercises, history, planner, benchmarks, timerSettings]);
 
-            // Timer Loop
             React.useEffect(() => {
                 let interval = null;
                 if (isActive && timeLeft > 0) {
@@ -202,7 +192,21 @@
                 if (wakeLock.current) wakeLock.current.release();
             };
 
-            // Logic Helpers
+            const toggleComplete = (id) => {
+                const updated = exercises.map(ex => {
+                    if (ex.id === id) {
+                        const isChecking = !ex.completed;
+                        // If we are currently timing THIS exercise, move timer forward
+                        if (isChecking && exercises[currentExIdx]?.id === id && isActive) {
+                            setTimeout(() => handlePhaseShift('NEXT'), 500);
+                        }
+                        return { ...ex, completed: isChecking };
+                    }
+                    return ex;
+                });
+                setExercises(updated);
+            };
+
             const addExercises = (names, target = 'active') => {
                 const newOnes = names.map(n => ({ 
                     id: Math.random().toString(36).substr(2, 9), 
@@ -231,6 +235,7 @@
                 };
                 setHistory([entry, ...history]);
                 setExercises([]); setActiveTab('dashboard');
+                if (wakeLock.current) wakeLock.current.release();
             };
 
             const updateSetInput = (exId, setId, field, val) => {
@@ -247,7 +252,21 @@
                 setExercises(copy);
             };
 
-            // Analytics
+            const cycleHistoryMuscle = (histId, muscleKey) => {
+                setHistory(history.map(h => {
+                    if (h.id === histId) {
+                        const newVolume = { ...h.volume };
+                        const count = newVolume[muscleKey];
+                        delete newVolume[muscleKey];
+                        const nextIdx = (MUSCLE_GROUPS.indexOf(muscleKey) + 1) % MUSCLE_GROUPS.length;
+                        const nextMuscle = MUSCLE_GROUPS[nextIdx];
+                        newVolume[nextMuscle] = (newVolume[nextMuscle] || 0) + count;
+                        return { ...h, volume: newVolume };
+                    }
+                    return h;
+                }));
+            };
+
             const weeklyStats = (() => {
                 const start = new Date(); start.setDate(start.getDate() - start.getDay()); start.setHours(0,0,0,0);
                 const week = history.filter(h => h.timestamp >= start.getTime());
@@ -258,7 +277,6 @@
 
             return (
                 <div className="min-h-screen bg-black text-white pb-32 safe-area-inset-bottom">
-                    {/* Bulk Modal */}
                     {showBulkModal && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
                             <div className="bg-zinc-900 w-full max-w-md border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl">
@@ -278,42 +296,42 @@
                             </button>
                         </div>
 
-                        {/* --- TRAIN TAB --- */}
                         {activeTab === 'program' && (
                             <div className="space-y-6">
                                 <div className="flex justify-between items-center px-1">
-                                    <h2 className="text-xl font-bold tracking-tight">Active Training</h2>
+                                    <h2 className="text-xl font-bold tracking-tight text-zinc-100">Train</h2>
                                     <div className="flex gap-2">
-                                        <button onClick={() => { setBulkTarget('active'); setShowBulkModal(true); }} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800"><ClipboardList size={20} className="text-zinc-400"/></button>
-                                        <button onClick={finishWorkout} className="bg-zinc-900 px-5 py-2.5 rounded-xl border border-zinc-700 active:scale-95"><Flag size={18}/></button>
+                                        <button onClick={() => { setBulkTarget('active'); setShowBulkModal(true); }} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 text-zinc-400"><ClipboardList size={20}/></button>
+                                        <button onClick={finishWorkout} className="bg-zinc-900 px-5 py-2.5 rounded-xl border border-zinc-700 active:scale-95 text-white shadow-lg"><Flag size={18}/></button>
                                         <button onClick={() => addExercises(['New Exercise'])} className="bg-cyan-500 text-black px-5 py-2.5 rounded-xl shadow-lg active:scale-95"><Plus size={18}/></button>
                                     </div>
                                 </div>
 
                                 <div className="space-y-4">
                                     {exercises.map((ex, exIdx) => (
-                                        <div key={ex.id} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden group">
+                                        <div key={ex.id} className={`bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 shadow-xl relative overflow-hidden group transition-all ${ex.completed ? 'opacity-30 scale-[0.98]' : ''}`}>
                                             <div className="flex justify-between items-start mb-4">
-                                                <div className="flex-1">
-                                                    <input value={ex.name} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, name: e.target.value} : x))} className="bg-transparent border-none p-0 text-xl font-bold w-full text-white" />
-                                                    <div className="flex items-center gap-2 mt-1">
-                                                        <select value={ex.muscle} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, muscle: e.target.value} : x))} className="bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border-none">
-                                                            {MUSCLE_GROUPS.map(m => <option key={m} value={m}>{m}</option>)}
-                                                        </select>
-                                                        {benchmarks[ex.name] && <span className="text-[10px] text-zinc-500 font-bold">PB: {benchmarks[ex.name].weight}kg × {benchmarks[ex.name].reps}</span>}
+                                                <div className="flex gap-4 items-start flex-1">
+                                                    <button onClick={() => toggleComplete(ex.id)} className="mt-1">
+                                                        {ex.completed ? <CheckCircle2 className="text-cyan-400" size={26} /> : <Circle className="text-zinc-700" size={26} />}
+                                                    </button>
+                                                    <div className="flex-1">
+                                                        <input value={ex.name} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, name: e.target.value} : x))} className="bg-transparent border-none p-0 text-xl font-bold w-full text-white focus:ring-0" />
+                                                        <div className="flex items-center gap-2 mt-1">
+                                                            <select value={ex.muscle} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, muscle: e.target.value} : x))} className="bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-lg border-none focus:ring-0">
+                                                                {MUSCLE_GROUPS.map(m => <option key={m} value={m}>{m}</option>)}
+                                                            </select>
+                                                            {benchmarks[ex.name] && <span className="text-[10px] text-zinc-500 font-bold">Last: {benchmarks[ex.name].weight}kg × {benchmarks[ex.name].reps}</span>}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
                                                     <button onClick={() => moveExercise(exIdx, -1)} className="p-1 text-zinc-600"><ChevronUp size={16}/></button>
                                                     <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="p-1 text-red-900"><Trash2 size={16}/></button>
                                                 </div>
                                             </div>
-                                            
                                             <div className="grid grid-cols-12 gap-2 text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1 px-2">
-                                                <div className="col-span-1">#</div>
-                                                <div className="col-span-3">Target</div>
-                                                <div className="col-span-4 text-center">Weight (kg)</div>
-                                                <div className="col-span-4 text-center">Reps</div>
+                                                <div className="col-span-1">#</div><div className="col-span-3">Target</div><div className="col-span-4 text-center">KG</div><div className="col-span-4 text-center">Reps</div>
                                             </div>
                                             <div className="space-y-2">
                                                 {ex.sets.map((s, i) => (
@@ -324,7 +342,7 @@
                                                         <input type="number" value={s.actualReps} onChange={e => updateSetInput(ex.id, s.id, 'actualReps', e.target.value)} className="col-span-4 bg-zinc-800/80 rounded-xl py-2.5 text-center text-sm font-black text-cyan-400 focus:ring-1 focus:ring-cyan-500" placeholder="0" />
                                                     </div>
                                                 ))}
-                                                <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: [...x.sets, createNewSet()]} : x))} className="w-full py-2.5 border border-dashed border-zinc-800 rounded-2xl text-[10px] font-black text-zinc-600 hover:text-cyan-500">+ Add Set</button>
+                                                <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: [...x.sets, createNewSet()]} : x))} className="w-full py-2.5 border border-dashed border-zinc-800 rounded-2xl text-[10px] font-black text-zinc-600 hover:text-cyan-500 transition-all">+ Add Set</button>
                                             </div>
                                         </div>
                                     ))}
@@ -332,29 +350,27 @@
                             </div>
                         )}
 
-                        {/* --- TIMER TAB --- */}
                         {activeTab === 'timer' && (
                             <div className="space-y-8 flex flex-col items-center">
-                                {/* Command Center: Configuration */}
                                 {!isActive && (
                                     <div className="w-full space-y-6">
                                         <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 shadow-2xl">
-                                            <h3 className="text-[10px] font-black uppercase text-cyan-400 mb-6 tracking-[0.2em] flex items-center gap-2"><SettingsIcon size={14}/> Session Parameters</h3>
+                                            <h3 className="text-[10px] font-black uppercase text-cyan-400 mb-6 tracking-[0.2em] flex items-center gap-2"><SettingsIcon size={14}/> Parameters</h3>
                                             <div className="grid grid-cols-2 gap-x-10 gap-y-6">
-                                                {[
-                                                    { label: 'Work (s)', k: 'work' }, { label: 'Set Rest', k: 'restSet' },
-                                                    { label: 'Ex. Rest', k: 'restExercise' }, { label: 'Prep', k: 'prep' }
-                                                ].map(f => (
+                                                {[ { label: 'Work', k: 'work' }, { label: 'Set Rest', k: 'restSet' }, { label: 'Ex. Rest', k: 'restExercise' }, { label: 'Prep', k: 'prep' } ].map(f => (
                                                     <div key={f.k}>
                                                         <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block mb-1">{f.label}</label>
-                                                        <input type="number" value={timerSettings[f.k]} onChange={e => setTimerSettings({...timerSettings, [f.k]: parseInt(e.target.value)||0})} className="w-full bg-transparent border-b border-zinc-800 py-1 text-2xl font-black focus:border-cyan-500 outline-none" />
+                                                        <input type="number" value={timerSettings[f.k]} onChange={e => {
+                                                            const val = parseInt(e.target.value)||0;
+                                                            setTimerSettings({...timerSettings, [f.k]: val});
+                                                            if (f.k === 'prep') setTimeLeft(val);
+                                                        }} className="w-full bg-transparent border-b border-zinc-800 py-1 text-2xl font-black focus:border-cyan-500 outline-none" />
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
-
                                         <div className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 shadow-2xl">
-                                            <h3 className="text-[10px] font-black uppercase text-zinc-500 mb-4 tracking-[0.2em]">Queue Management</h3>
+                                            <h3 className="text-[10px] font-black uppercase text-zinc-500 mb-4 tracking-[0.2em]">Queue</h3>
                                             <div className="space-y-2 max-h-[300px] overflow-y-auto no-scrollbar">
                                                 {exercises.map((ex, i) => (
                                                     <div key={ex.id} className="flex items-center gap-3 bg-black/30 p-3 rounded-2xl border border-zinc-800/50">
@@ -378,23 +394,20 @@
                                                 <div className={`h-full transition-all duration-700 ${timerMode === 'WORK' ? 'bg-cyan-500' : 'bg-amber-500'}`} style={{ width: `${((currentExIdx + 1) / exercises.length) * 100}%` }} />
                                             </div>
                                             <span className={`text-[10px] font-black uppercase tracking-[0.3em] mb-2 block ${timerMode === 'WORK' ? 'text-cyan-400' : 'text-amber-500'}`}>{timerMode}</span>
-                                            <h3 className="text-4xl font-black mb-4 truncate">{exercises[currentExIdx]?.name}</h3>
+                                            <h3 className="text-4xl font-black mb-4 truncate px-2">{exercises[currentExIdx]?.name}</h3>
                                             
-                                            {/* In-Timer Set Entry (REPS/KG) */}
                                             {timerMode !== 'COMPLETED' && (
                                                 <div className="grid grid-cols-2 gap-4 mt-6 bg-black/40 p-4 rounded-3xl border border-zinc-800/50">
                                                     <div>
                                                         <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-1">Set {currentCycle} KG</label>
-                                                        <input type="number" 
-                                                            value={exercises[currentExIdx]?.sets[currentCycle-1]?.weight || ""} 
+                                                        <input type="number" value={exercises[currentExIdx]?.sets[currentCycle-1]?.weight || ""} 
                                                             onChange={e => updateSetInput(exercises[currentExIdx].id, exercises[currentExIdx].sets[currentCycle-1].id, 'weight', e.target.value)}
-                                                            className="w-full bg-zinc-800 rounded-xl py-3 text-center text-xl font-black border-none focus:ring-1 focus:ring-cyan-500" placeholder="0" 
+                                                            className="w-full bg-zinc-800 rounded-xl py-3 text-center text-xl font-black border-none focus:ring-1 focus:ring-cyan-500 text-white" placeholder="0" 
                                                         />
                                                     </div>
                                                     <div>
                                                         <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest block mb-1">Set {currentCycle} Reps</label>
-                                                        <input type="number" 
-                                                            value={exercises[currentExIdx]?.sets[currentCycle-1]?.actualReps || ""} 
+                                                        <input type="number" value={exercises[currentExIdx]?.sets[currentCycle-1]?.actualReps || ""} 
                                                             onChange={e => updateSetInput(exercises[currentExIdx].id, exercises[currentExIdx].sets[currentCycle-1].id, 'actualReps', e.target.value)}
                                                             className="w-full bg-zinc-800 rounded-xl py-3 text-center text-xl font-black text-cyan-400 border-none focus:ring-1 focus:ring-cyan-500" placeholder="0" 
                                                         />
@@ -413,26 +426,26 @@
                                             </svg>
                                             <div className="absolute flex flex-col items-center">
                                                 <span className="text-9xl font-black font-mono tracking-tighter text-white tabular-nums">{timeLeft}</span>
-                                                <span className="text-xs font-bold text-zinc-500 mt-2 uppercase tracking-widest">Cycle {currentCycle} of {exercises[currentExIdx]?.sets?.length || 1}</span>
+                                                <span className="text-xs font-bold text-zinc-500 mt-2 uppercase tracking-widest">Set {currentCycle} of {exercises[currentExIdx]?.sets?.length || 1}</span>
                                             </div>
                                         </div>
 
-                                        <div className="flex gap-4 w-full mb-10">
-                                            <button onClick={() => handlePhaseShift('PREV')} className="flex-1 bg-zinc-900 border border-zinc-800 p-6 rounded-3xl active:scale-90 flex justify-center text-zinc-500 border border-zinc-800"><SkipBack size={32}/></button>
-                                            <button onClick={() => setIsActive(!isActive)} className={`flex-[2] py-7 rounded-[2rem] font-black text-2xl active:scale-95 shadow-2xl flex items-center justify-center gap-4 ${isActive ? 'bg-zinc-800 text-white' : 'bg-white text-black'}`}>
+                                        <div className="flex gap-4 w-full mb-10 px-2">
+                                            <button onClick={() => handlePhaseShift('PREV')} className="flex-1 bg-zinc-900 py-7 rounded-[2rem] active:scale-90 flex justify-center text-zinc-500 border border-zinc-800"><SkipBack size={32}/></button>
+                                            <button onClick={() => setIsActive(!isActive)} className={`flex-[2.5] py-7 rounded-[2rem] font-black text-2xl active:scale-95 shadow-2xl flex items-center justify-center gap-4 ${isActive ? 'bg-zinc-800 text-white' : 'bg-white text-black'}`}>
                                                 {isActive ? <Pause fill="currentColor" size={32}/> : <Play fill="currentColor" size={32}/>} {isActive ? "PAUSE" : "START"}
                                             </button>
-                                            <button onClick={() => handlePhaseShift('NEXT')} className="flex-1 bg-zinc-900 border border-zinc-800 p-6 rounded-3xl active:scale-90 flex justify-center text-zinc-500 border border-zinc-800"><SkipForward size={32}/></button>
+                                            <button onClick={() => handlePhaseShift('NEXT')} className="flex-1 bg-zinc-900 py-7 rounded-[2rem] active:scale-90 flex justify-center text-zinc-500 border border-zinc-800"><SkipForward size={32}/></button>
                                         </div>
+                                        <button onClick={resetTimer} className="text-xs font-black uppercase text-zinc-600 hover:text-white mb-8 flex items-center gap-2"><RotateCcw size={14} /> Full Reset</button>
                                     </>
                                 )}
                             </div>
                         )}
 
-                        {/* --- PLANNER TAB --- */}
                         {activeTab === 'planner' && (
-                            <div className="space-y-5">
-                                <h2 className="text-xl font-bold tracking-tight mb-6">Weekly Plans</h2>
+                            <div className="space-y-5 animate-in">
+                                <h2 className="text-xl font-bold tracking-tight mb-6 px-1">Weekly Plans</h2>
                                 {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(d => (
                                     <div key={d} className="bg-zinc-900 border border-zinc-800 rounded-[2rem] overflow-hidden transition-all">
                                         <div className="p-6 flex justify-between items-center" onClick={() => setExpandedDay(expandedDay === d ? null : d)}>
@@ -447,7 +460,7 @@
                                         </div>
                                         {expandedDay === d && (
                                             <div className="px-6 pb-6 pt-2 space-y-4 border-t border-zinc-800/50 animate-in">
-                                                <div className="flex justify-between items-center">
+                                                <div className="flex justify-between items-center px-1">
                                                     <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Exercise Editor</span>
                                                     <button onClick={() => { setBulkTarget(d); setShowBulkModal(true); }} className="text-cyan-400 text-[10px] font-black uppercase flex items-center gap-1"><ClipboardList size={14}/> Bulk</button>
                                                 </div>
@@ -457,13 +470,13 @@
                                                             <input value={ex.name} onChange={e => {
                                                                 const update = planner[d].map(x => x.id === ex.id ? {...x, name: e.target.value} : x);
                                                                 setPlanner({...planner, [d]: update});
-                                                            }} className="flex-1 bg-transparent border-none text-sm font-bold p-0 text-white" />
-                                                            <button onClick={() => setPlanner({...planner, [d]: planner[d].filter(x => x.id !== ex.id)})} className="text-zinc-800"><X size={16}/></button>
+                                                            }} className="flex-1 bg-transparent border-none text-sm font-bold p-0 text-white focus:ring-0" />
+                                                            <button onClick={() => setPlanner({...planner, [d]: planner[d].filter(x => x.id !== ex.id)})} className="text-zinc-800 hover:text-red-500"><X size={16}/></button>
                                                         </div>
                                                         <select value={ex.muscle} onChange={e => {
                                                             const update = planner[d].map(x => x.id === ex.id ? {...x, muscle: e.target.value} : x);
                                                             setPlanner({...planner, [d]: update});
-                                                        }} className="w-full bg-zinc-800 rounded-xl py-2 px-3 text-[10px] font-black uppercase text-cyan-400 tracking-widest border-none">
+                                                        }} className="w-full bg-zinc-800 rounded-xl py-2 px-3 text-[10px] font-black uppercase text-cyan-400 tracking-widest border-none focus:ring-1 focus:ring-cyan-500">
                                                             {MUSCLE_GROUPS.map(m => <option key={m} value={m}>{m}</option>)}
                                                         </select>
                                                     </div>
@@ -471,7 +484,7 @@
                                                 <button onClick={() => {
                                                     const newEx = { id: Math.random().toString(36).substr(2,9), name: 'New Exercise', muscle: 'Full Body', sets: Array(4).fill(0).map(()=>createNewSet()) };
                                                     setPlanner({...planner, [d]: [...planner[d], newEx]});
-                                                }} className="w-full py-4 border border-dashed border-zinc-800 rounded-3xl text-[10px] font-black uppercase text-zinc-600">+ Add Single</button>
+                                                }} className="w-full py-4 border border-dashed border-zinc-800 rounded-3xl text-[10px] font-black uppercase text-zinc-600 hover:text-cyan-400">+ Add Single</button>
                                             </div>
                                         )}
                                     </div>
@@ -479,13 +492,12 @@
                             </div>
                         )}
 
-                        {/* --- REPORT TAB --- */}
                         {activeTab === 'dashboard' && (
-                            <div className="space-y-8 pb-10">
+                            <div className="space-y-8 animate-in pb-10">
                                 <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-8 shadow-2xl relative overflow-hidden group">
                                     <Award className="absolute -right-4 -bottom-4 w-32 h-32 text-cyan-500/10 group-hover:scale-110 transition-transform" />
                                     <h2 className="text-[10px] font-black text-cyan-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <div className="h-2 w-2 bg-cyan-500 rounded-full animate-pulse" /> Weekly Intelligence
+                                        <div className="h-2 w-2 bg-cyan-500 rounded-full animate-pulse" /> Weekly Report
                                     </h2>
                                     <h3 className="text-3xl font-black mb-8 tracking-tighter">Performance Hub</h3>
                                     <div className="grid grid-cols-2 gap-4 mb-8">
@@ -499,10 +511,12 @@
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Volume Breakdown</h4>
+                                        <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Muscle Focus (Tap to Correct)</h4>
                                         {Object.entries(weeklyStats.muscles).sort((a,b)=>b[1]-a[1]).map(([m, c]) => (
                                             <div key={m} className="space-y-1">
-                                                <div className="flex justify-between text-[10px] font-black uppercase"><span>{m}</span><span className="text-cyan-400">{c} Sets</span></div>
+                                                <div className="flex justify-between text-[10px] font-black uppercase">
+                                                    <span>{m}</span><span className="text-cyan-400">{c} Sets</span>
+                                                </div>
                                                 <div className="h-1.5 w-full bg-black rounded-full overflow-hidden">
                                                     <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(c / Math.max(weeklyStats.sets, 1)) * 100}%` }} />
                                                 </div>
@@ -514,17 +528,20 @@
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-bold px-2 flex items-center gap-2"><HistoryIcon size={20} className="text-cyan-400"/> Training Log</h3>
                                     {history.map(h => (
-                                        <div key={h.id} className="bg-zinc-900 border border-zinc-800 p-6 rounded-[2.5rem] flex justify-between items-center group transition-all active:scale-[0.98]">
-                                            <div>
-                                                <div className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1">{h.date}</div>
-                                                <div className="text-xl font-black">{h.exCount} Exercises</div>
-                                            </div>
-                                            <div className="flex items-center gap-4">
-                                                <div className="text-right">
-                                                    <div className="text-2xl font-black">{h.totalSets}</div>
-                                                    <div className="text-[9px] font-black text-zinc-600 uppercase">Sets</div>
+                                        <div key={h.id} className="bg-zinc-900 border border-zinc-800 p-6 rounded-[2.5rem] flex flex-col gap-4 shadow-xl">
+                                            <div className="flex justify-between items-center">
+                                                <div><div className="text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-1">{h.date}</div><div className="text-xl font-black">{h.exCount} Exercises</div></div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-right"><div className="text-2xl font-black">{h.totalSets}</div><div className="text-[9px] font-black text-zinc-600 uppercase">Sets</div></div>
+                                                    <button onClick={() => { if(confirm('Delete workout?')) setHistory(history.filter(x=>x.id!==h.id))}} className="p-2 text-zinc-800 hover:text-red-900"><Trash2 size={20}/></button>
                                                 </div>
-                                                <button onClick={() => { if(confirm('Delete workout?')) setHistory(history.filter(x=>x.id!==h.id))}} className="p-2 text-zinc-800 hover:text-red-900"><Trash2 size={20}/></button>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {Object.keys(h.volume).map(vKey => (
+                                                    <button key={vKey} onClick={() => cycleHistoryMuscle(h.id, vKey)} className="px-3 py-1 bg-black rounded-lg text-[9px] font-black uppercase border border-zinc-800 text-zinc-400 active:text-cyan-400">
+                                                        {vKey} ({h.volume[vKey]})
+                                                    </button>
+                                                ))}
                                             </div>
                                         </div>
                                     ))}

@@ -1,13 +1,12 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>IronFocus Pro 10.1</title>
+    <title>IronFocus Pro 14.4</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="IronFocus">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2964/2964514.png">
     
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -18,25 +17,22 @@
     <style>
         body { 
             background-color: black; 
-            margin: 0; 
-            padding: 0; 
-            color: white;
+            margin: 0; padding: 0; color: white;
             -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
             overflow-x: hidden;
             user-select: none;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        input[type="number"]::-webkit-inner-spin-button, 
-        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .kg-glow { color: #22d3ee; }
+        .reps-glow { color: #4ade80; }
         .animate-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .safe-area-inset-bottom { padding-bottom: env(safe-area-inset-bottom); }
-        input, select { font-size: 16px !important; }
-        .kg-text { color: #22d3ee; } 
-        .reps-text { color: #4ade80; }
-        .active-ring { filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.4)); }
-        .queue-active { border-color: #22d3ee; background: rgba(34, 211, 238, 0.05); }
+        select { background-image: none !important; -webkit-appearance: none; appearance: none; }
+        .active-timer-ring { filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.3)); }
+        input:focus { outline: none; }
     </style>
 </head>
 <body>
@@ -47,73 +43,54 @@
         const Icon = ({ children, size = 24, className = "" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
         );
-
         const Play = (p) => <Icon {...p}><polygon points="5 3 19 12 5 21 5 3"/></Icon>;
         const Pause = (p) => <Icon {...p}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></Icon>;
         const RotateCcw = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></Icon>;
         const Plus = (p) => <Icon {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></Icon>;
         const Trash2 = (p) => <Icon {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></Icon>;
         const Dumbbell = (p) => <Icon {...p}><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/><path d="M8.5 6.5v11M15.5 6.5v11"/></Icon>;
-        const TimerIcon = (p) => <Icon {...p}><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="15" y2="11"/><circle cx="12" cy="14" r="8"/></Icon>;
-        const CheckCircle2 = (p) => <Icon {...p}><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></Icon>;
-        const Circle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/></Icon>;
+        const TimerIcon = (p) => <Icon {...p}><line x1="10" y1="2" x2="14" y2="2"/><circle cx="12" cy="14" r="8"/><line x1="12" y1="11" x2="12" y2="14"/><line x1="12" y1="14" x2="14" y2="16"/></Icon>;
         const HistoryIcon = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/><line x1="12" y1="7" x2="12" y2="12"/><line x1="12" y1="12" x2="16" y2="14"/></Icon>;
-        const ClipboardList = (p) => <Icon {...p}><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="16" x2="16" y2="16"/></Icon>;
+        const Check = (p) => <Icon {...p}><polyline points="20 6 9 17 4 12"/></Icon>;
         const X = (p) => <Icon {...p}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></Icon>;
         const ChevronUp = (p) => <Icon {...p}><polyline points="18 15 12 9 6 15"/></Icon>;
         const ChevronDown = (p) => <Icon {...p}><polyline points="6 9 12 15 18 9"/></Icon>;
-        const Award = (p) => <Icon {...p}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></Icon>;
-        const Clock = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
+        const ClockIcon = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
         const Flag = (p) => <Icon {...p}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></Icon>;
-        const Activity = (p) => <Icon {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></Icon>;
-        const Edit = (p) => <Icon {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></Icon>;
         const Volume2 = (p) => <Icon {...p}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></Icon>;
         const VolumeX = (p) => <Icon {...p}><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></Icon>;
-        const LayoutGrid = (p) => <Icon {...p}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></Icon>;
+        const ClipboardList = (p) => <Icon {...p}><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="16" x2="16" y2="16"/></Icon>;
         const SkipForward = (p) => <Icon {...p}><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></Icon>;
         const SkipBack = (p) => <Icon {...p}><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></Icon>;
-        const AlertOctagon = (p) => <Icon {...p}><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></Icon>;
+        const Edit = (p) => <Icon {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></Icon>;
+        const LayoutGrid = (p) => <Icon {...p}><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></Icon>;
+        const Award = (p) => <Icon {...p}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></Icon>;
+        const Activity = (p) => <Icon {...p}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></Icon>;
 
-        // --- Utils & Library ---
-        const MUSCLE_GROUPS = ['Chest', 'Back', 'Quads', 'Hamstrings', 'Shoulders', 'Biceps', 'Triceps', 'Abs', 'Calves', 'Glutes', 'Full Body'];
-        const MUSCLE_MAP = {
-            Chest: ['bench', 'chest', 'fly', 'pec', 'incline press', 'pushup'],
-            Back: ['row', 'pull', 'lat', 'deadlift', 'back', 'chin', 'traps', 'lats', 'shrug'],
-            Triceps: ['tricep', 'skullcrusher', 'pushdown', 'dip'],
-            Biceps: ['bicep', 'curl', 'hammer', 'preacher'],
-            Shoulders: ['shoulder', 'overhead', 'lateral', 'raise', 'delt', 'military', 'landmine'],
-            Quads: ['squat', 'leg press', 'quad', 'lunge', 'extension'],
-            Hamstrings: ['rdl', 'stiff', 'hamstring', 'curl'],
-            Glutes: ['glute', 'hip thrust', 'bridge'],
-            Abs: ['ab', 'crunch', 'situp', 'plank', 'core'],
-            Calves: ['calf', 'calve']
-        };
+        // --- Stable Constants ---
+        const MUSCLE_GROUPS = ['Chest', 'Back', 'Quads', 'Hamstrings', 'Shoulders', 'Biceps', 'Triceps', 'Abs', 'Calves', 'Glutes', 'Core', 'Full Body'];
+        const CARDIO_TYPES = ['Run', 'Bike', 'Swim'];
+        const KEYS = { EX: 'if_stable_exercises', HIST: 'if_stable_history', PLAN: 'if_stable_planner', BENCH: 'if_stable_benchmarks', SETT: 'if_stable_settings', DAY: 'if_stable_day', FOC: 'if_stable_focus' };
 
-        const detectMuscle = (name) => {
-            const low = name.toLowerCase();
-            for (const [m, keywords] of Object.entries(MUSCLE_MAP)) {
-                if (keywords.some(k => low.includes(k))) return m;
-            }
+        const detectMuscle = (n) => {
+            const l = n.toLowerCase();
+            const map = { Chest: ['bench', 'chest', 'fly', 'pec'], Back: ['row', 'pull', 'lat', 'deadlift'], Triceps: ['tricep', 'skull', 'pushdown'], Biceps: ['bicep', 'curl', 'hammer'], Shoulders: ['shoulder', 'overhead', 'delt', 'landmine'], Quads: ['squat', 'leg press', 'quad'], Hamstrings: ['rdl', 'stiff', 'hamstring'], Glutes: ['glute', 'bridge'], Abs: ['ab', 'crunch', 'plank'], Core: ['situp', 'twist', 'core'] };
+            for (const [m, k] of Object.entries(map)) { if (k.some(kw => l.includes(kw))) return m; }
             return 'Full Body';
         };
 
-        const formatDuration = (s) => {
+        const formatDur = (s) => {
             if (isNaN(s) || s < 0) return "0s";
             const h = Math.floor(s / 3600);
             const m = Math.floor((s % 3600) / 60);
             const sec = s % 60;
-            if (h > 0) return `${h}h ${m}m ${sec}s`;
-            if (m > 0) return `${m}m ${sec}s`;
-            return `${sec}s`;
+            return h > 0 ? `${h}h ${m}m` : `${m}m ${sec}s`;
         };
 
-        const createNewSet = (target = "10") => ({ id: Math.random().toString(36).substr(2, 9), targetReps: target, actualReps: "", weight: "" });
+        const createNewSet = (t = "10") => ({ id: Math.random().toString(36).substr(2, 9), target: t, weight: "", reps: "" });
 
         function App() {
-            // --- Core Persistence ---
-            const [activeTab, setActiveTab] = React.useState('program');
-            
-            // Defensively parse storage
+            // --- Core Storage ---
             const safeParse = (key, fallback) => {
                 try {
                     const data = localStorage.getItem(key);
@@ -121,173 +98,171 @@
                 } catch (e) { return fallback; }
             };
 
-            const [exercises, setExercises] = React.useState(() => safeParse('if_ex_v10', []));
-            const [history, setHistory] = React.useState(() => safeParse('if_hist_v10', []));
-            const [planner, setPlanner] = React.useState(() => safeParse('if_plan_v10', 
+            const [activeTab, setActiveTab] = React.useState('program');
+            const [exercises, setExercises] = React.useState(() => safeParse(KEYS.EX, []));
+            const [history, setHistory] = React.useState(() => safeParse(KEYS.HIST, []));
+            const [planner, setPlanner] = React.useState(() => safeParse(KEYS.PLAN, 
                 ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].reduce((a, d) => ({ ...a, [d]: { type: 'strength', exercises: [], activity: 'Run', focus: '' } }), {})));
-            const [benchmarks, setBenchmarks] = React.useState(() => safeParse('if_bench_v10', {}));
-            const [timerSettings, setTimerSettings] = React.useState(() => safeParse('if_time_v10', { work: 45, restSet: 60, restEx: 120, prep: 10 }));
+            const [benchmarks, setBenchmarks] = React.useState(() => safeParse(KEYS.BENCH, {}));
+            const [timerSettings, setTimerSettings] = React.useState(() => safeParse(KEYS.SETT, { work: 45, restSet: 60, restEx: 120, prep: 10 }));
             
-            const [activeDay, setActiveDay] = React.useState(() => localStorage.getItem('if_active_day_v10') || null);
-            const [activeFocus, setActiveFocus] = React.useState(() => localStorage.getItem('if_active_focus_v10') || '');
+            const [activeDay, setActiveDay] = React.useState(() => localStorage.getItem(KEYS.DAY) || null);
+            const [activeFocus, setActiveFocus] = React.useState(() => localStorage.getItem(KEYS.FOC) || '');
             
-            const [isAudioEnabled, setIsAudioEnabled] = React.useState(true);
-            const [showBulkModal, setShowBulkModal] = React.useState(false);
-            const [bulkTarget, setBulkTarget] = React.useState('active');
-            const [bulkInput, setBulkInput] = React.useState("");
+            const [isAudio, setIsAudio] = React.useState(true);
+            const [bulk, setBulk] = React.useState({ show: false, target: 'active', input: '' });
+            const [editHistId, setEditHistId] = React.useState(null);
             const [expandedDay, setExpandedDay] = React.useState(null);
 
-            // Session Clock
+            // Live Timer Logic
             const [sessionTime, setSessionTime] = React.useState(0);
-            const [sessionActive, setSessionActive] = React.useState(false);
-
-            // Timer Engine
+            const [isLive, setIsLive] = React.useState(false);
             const [timeLeft, setTimeLeft] = React.useState(timerSettings.prep);
-            const [isActive, setIsActive] = React.useState(false);
+            const [timerActive, setTimerActive] = React.useState(false);
             const [timerMode, setTimerMode] = React.useState('PREP');
-            const [currExIdx, setCurrExIdx] = React.useState(0);
-            const [currCycle, setCurrCycle] = React.useState(1);
+            const [currIdx, setCurrIdx] = React.useState(0);
+            const [currSet, setCurrSet] = React.useState(1);
 
-            const speak = React.useCallback((text) => {
-                if (!isAudioEnabled) return;
-                const ut = new SpeechSynthesisUtterance(text);
-                ut.rate = 1.1;
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.speak(ut);
-            }, [isAudioEnabled]);
+            const audioCtxRef = React.useRef(null);
 
-            // Sync: Current exercises to Planner Day template
+            // Unified Persistence
             React.useEffect(() => {
-                if (activeDay && exercises.length > 0) {
-                    setPlanner(prev => ({
-                        ...prev,
-                        [activeDay]: { ...prev[activeDay], exercises: exercises.map(ex => ({...ex, completed: false, sets: ex.sets.map(s => ({...s, actualReps: "", weight: ""}))})) }
-                    }));
-                }
-            }, [exercises.length, activeDay]);
-
-            // Persistent Saving
-            React.useEffect(() => {
-                localStorage.setItem('if_ex_v10', JSON.stringify(exercises));
-                localStorage.setItem('if_hist_v10', JSON.stringify(history));
-                localStorage.setItem('if_plan_v10', JSON.stringify(planner));
-                localStorage.setItem('if_bench_v10', JSON.stringify(benchmarks));
-                localStorage.setItem('if_time_v10', JSON.stringify(timerSettings));
-                localStorage.setItem('if_active_day_v10', activeDay || '');
-                localStorage.setItem('if_active_focus_v10', activeFocus);
+                localStorage.setItem(KEYS.EX, JSON.stringify(exercises));
+                localStorage.setItem(KEYS.HIST, JSON.stringify(history));
+                localStorage.setItem(KEYS.PLAN, JSON.stringify(planner));
+                localStorage.setItem(KEYS.BENCH, JSON.stringify(benchmarks));
+                localStorage.setItem(KEYS.SETT, JSON.stringify(timerSettings));
+                localStorage.setItem(KEYS.DAY, activeDay || '');
+                localStorage.setItem(KEYS.FOC, activeFocus);
             }, [exercises, history, planner, benchmarks, timerSettings, activeDay, activeFocus]);
 
-            // Clock Counter
+            // Sync to Day Blueprint (strength only, cardio handled by activation)
             React.useEffect(() => {
-                let interval = null;
-                if (sessionActive && timerMode !== 'COMPLETED') {
-                    interval = setInterval(() => setSessionTime(prev => prev + 1), 1000);
+                if (activeDay && exercises.length > 0 && planner[activeDay]?.type === 'strength') {
+                    setPlanner(prev => ({
+                        ...prev,
+                        [activeDay]: { 
+                            ...prev[activeDay], 
+                            focus: activeFocus, 
+                            exercises: exercises.map(ex => ({
+                                ...ex, 
+                                completed: false, 
+                                sets: (ex.sets || []).map(s => ({...s, reps: "", weight: ""}))
+                            })) 
+                        }
+                    }));
                 }
-                return () => clearInterval(interval);
-            }, [sessionActive, timerMode]);
+            }, [exercises.length, activeDay, activeFocus]);
 
-            // Timer Loop
+            const enableAudioEngine = () => {
+                if (!audioCtxRef.current) {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    gain.gain.value = 0.0001; osc.connect(gain); gain.connect(ctx.destination);
+                    osc.start(); audioCtxRef.current = ctx;
+                }
+            };
+
+            const speak = React.useCallback((txt) => {
+                if (!isAudio) return;
+                const ut = new SpeechSynthesisUtterance(txt);
+                ut.rate = 1.1; window.speechSynthesis.cancel(); window.speechSynthesis.speak(ut);
+            }, [isAudio]);
+
             React.useEffect(() => {
-                let interval = null;
-                if (isActive && timeLeft > 0) {
-                    interval = setInterval(() => {
+                let int = null;
+                if (isLive && timerMode !== 'COMPLETED') int = setInterval(() => setSessionTime(p => p + 1), 1000);
+                return () => clearInterval(int);
+            }, [isLive, timerMode]);
+
+            React.useEffect(() => {
+                let int = null;
+                if (timerActive && timeLeft > 0) {
+                    int = setInterval(() => {
                         if (timeLeft <= 4 && timeLeft > 1) speak((timeLeft - 1).toString());
-                        setTimeLeft(prev => prev - 1);
+                        setTimeLeft(p => p - 1);
                     }, 1000);
-                } else if (isActive && timeLeft === 0) {
-                    handlePhaseShift();
+                } else if (timerActive && timeLeft === 0) {
+                    handleTransition('NEXT');
                 }
-                return () => clearInterval(interval);
-            }, [isActive, timeLeft, speak]);
+                return () => clearInterval(int);
+            }, [timerActive, timeLeft, speak]);
 
-            const handlePhaseShift = (dir = 'NEXT') => {
-                if (!sessionActive) setSessionActive(true);
-                const currentEx = exercises[currExIdx];
-                const totalSets = currentEx?.sets?.length || 1;
+            const handleTransition = (dir = 'NEXT') => {
+                if (!isLive) { setIsLive(true); enableAudioEngine(); }
+                const cur = exercises[currIdx];
+                const totalSets = (cur?.sets || []).length || 1;
+                const phaseTime = timerMode === 'WORK' ? timerSettings.work : timerMode === 'REST_SET' ? timerSettings.restSet : timerMode === 'REST_EX' ? timerSettings.restEx : timerSettings.prep;
 
                 if (dir === 'NEXT') {
-                    if (timerMode === 'PREP') startPhase('WORK', currExIdx, 1);
+                    if (timerMode === 'PREP') startMode('WORK', currIdx, 1);
                     else if (timerMode === 'WORK') {
-                        if (currCycle < totalSets) startPhase('REST_SET', currExIdx, currCycle);
-                        else if (currExIdx < exercises.length - 1) startPhase('REST_EX', currExIdx, currCycle);
-                        else finishSession();
-                    } else if (timerMode === 'REST_SET') startPhase('WORK', currExIdx, currCycle + 1);
-                    else if (timerMode === 'REST_EX') startPhase('WORK', currExIdx + 1, 1);
-                    else if (timerMode === 'COMPLETED') resetTimer();
+                        if (currSet < totalSets) startMode('REST_SET', currIdx, currSet);
+                        else if (currIdx < exercises.length - 1) startMode('REST_EX', currIdx, currSet);
+                        else { setTimerActive(false); setTimerMode('COMPLETED'); speak("Session complete."); }
+                    } else if (timerMode === 'REST_SET') startMode('WORK', currIdx, currSet + 1);
+                    else if (timerMode === 'REST_EX') startMode('WORK', currIdx + 1, 1);
                 } else {
-                    if (currCycle > 1) startPhase('WORK', currExIdx, currCycle - 1);
-                    else if (currExIdx > 0) startPhase('WORK', currExIdx - 1, 1);
-                    else resetTimer();
+                    if (timeLeft < (phaseTime - 3)) { setTimeLeft(phaseTime); }
+                    else {
+                        if (timerMode === 'WORK') {
+                            if (currSet > 1) startMode('REST_SET', currIdx, currSet - 1);
+                            else if (currIdx > 0) startMode('REST_EX', currIdx - 1, (exercises[currIdx-1].sets || []).length);
+                        } else if (timerMode === 'REST_SET') startMode('WORK', currIdx, currSet);
+                        else if (timerMode === 'REST_EX') startMode('WORK', currIdx, totalSets);
+                    }
                 }
             };
 
-            const startPhase = (mode, idx, cycle) => {
-                setTimerMode(mode); setCurrExIdx(idx); setCurrCycle(cycle);
-                if (mode === 'WORK') { setTimeLeft(timerSettings.work); speak(`${exercises[idx]?.name}. Set ${cycle}. Go.`); }
-                else if (mode === 'REST_SET') { setTimeLeft(timerSettings.restSet); speak(`Rest. Next set ${cycle + 1}.`); }
-                else { setTimeLeft(timerSettings.restEx); speak(`Rest. Next exercise ${exercises[idx + 1]?.name}.`); }
+            const startMode = (m, i, s) => {
+                setTimerMode(m); setCurrIdx(i); setCurrSet(s);
+                setTimeLeft(m === 'WORK' ? timerSettings.work : m === 'REST_SET' ? timerSettings.restSet : timerSettings.restEx);
+                if (m === 'WORK') speak(`${exercises[i]?.name}. Go.`);
+                else if (m === 'REST_SET') speak(`Rest. Set ${s+1} next.`);
+                else speak(`Rest. Next up: ${exercises[i+1]?.name}.`);
             };
 
-            const resetTimer = () => { setIsActive(false); setCurrExIdx(0); setCurrCycle(1); setTimerMode('PREP'); setTimeLeft(timerSettings.prep); };
-            const finishSession = () => { setIsActive(false); setTimerMode('COMPLETED'); speak("Workout complete. Tap flag to save."); };
-
-            const finishWorkoutAction = () => {
+            const finishWorkout = () => {
                 if (exercises.length === 0) return;
-                const newBenchmarks = { ...benchmarks };
-                const volMap = {};
-                let totalSets = 0;
-
+                const newBench = { ...benchmarks };
+                const vol = {};
                 exercises.forEach(ex => {
-                    const lastValidSet = [...ex.sets].reverse().find(s => s && s.actualReps && s.actualReps !== "");
-                    if (lastValidSet) newBenchmarks[ex.name] = { weight: lastValidSet.weight, reps: lastValidSet.actualReps };
-                    const muscle = ex.muscle || 'Full Body';
-                    volMap[muscle] = (volMap[muscle] || 0) + (ex.sets ? ex.sets.length : 0);
-                    totalSets += (ex.sets ? ex.sets.length : 0);
+                    const last = [...(ex.sets || [])].reverse().find(s => s.reps !== "");
+                    if (last) newBench[ex.name] = { w: last.weight, r: last.reps };
+                    vol[ex.muscle] = (vol[ex.muscle] || 0) + (ex.sets || []).length;
                 });
-
-                const newEntry = {
-                    id: Date.now().toString(),
-                    date: new Date().toLocaleDateString(),
-                    timestamp: Date.now(),
-                    focus: activeFocus || (activeDay ? `${activeDay} Session` : 'Manual Workout'),
-                    totalSets: totalSets || 0,
-                    exCount: exercises.length,
-                    duration: sessionTime || 0,
-                    volume: volMap
-                };
-
-                const newHistory = [newEntry, ...history];
-                setHistory(newHistory);
-                setBenchmarks(newBenchmarks);
-                setExercises([]);
-                setSessionTime(0);
-                setSessionActive(false);
-                setActiveDay(null);
-                setActiveFocus('');
-                
-                // Immediate force save to prevent "dead" state data loss
-                localStorage.setItem('if_hist_v10', JSON.stringify(newHistory));
-                localStorage.setItem('if_ex_v10', JSON.stringify([]));
-                
+                const entry = { id: Date.now().toString(), date: new Date().toLocaleDateString(), timestamp: Date.now(), focus: activeFocus || 'Training Session', sets: exercises.reduce((s,e)=>(s + (e.sets||[]).length), 0), dur: sessionTime, vol };
+                setHistory([entry, ...history]); setBenchmarks(newBench); setExercises([]); setSessionTime(0); setIsLive(false); setActiveFocus(''); setActiveDay(null);
                 setActiveTab('dashboard');
             };
 
-            const handleBulkImport = () => {
-                const names = bulkInput.split('\n').filter(l => l.trim() !== "");
-                const newExs = names.map(n => ({ 
-                    id: Math.random().toString(36).substr(2, 9), 
-                    name: n.trim(), 
-                    muscle: detectMuscle(n.trim()), 
-                    completed: false, 
-                    sets: Array(4).fill(0).map(() => createNewSet()) 
+            const editHistoryVolume = (id, muscle, delta) => {
+                setHistory(prevHistory => prevHistory.map(h => {
+                    if (h.id === id) {
+                        const newVol = { ...(h.vol || {}) };
+                        newVol[muscle] = Math.max(0, (newVol[muscle] || 0) + delta);
+                        const newSetsCount = Object.values(newVol).reduce((a,b)=>a+b, 0);
+                        return { ...h, vol: newVol, sets: newSetsCount };
+                    }
+                    return h;
                 }));
+            };
 
-                if (bulkTarget === 'active') setExercises([...exercises, ...newExs]);
-                else {
-                    const d = bulkTarget;
-                    setPlanner({...planner, [d]: {...planner[d], exercises: [...planner[d].exercises, ...newExs]}});
+            const activatePlan = (day) => {
+                const plan = planner[day];
+                setActiveDay(day); setActiveFocus(plan.focus || '');
+                if (plan.type === 'cardio') {
+                    setExercises([{ id: 'c-1', name: `${plan.activity} Session`, muscle: 'Full Body', completed: false, sets: [createNewSet('30m')] }]);
+                } else {
+                    setExercises((plan.exercises || []).map(ex => ({ ...ex, completed: false })));
                 }
-                setBulkInput(""); setShowBulkModal(false);
+                setActiveTab('program'); setExpandedDay(null);
+                setTimerActive(false); setTimerMode('PREP'); setTimeLeft(timerSettings.prep); setCurrIdx(0); setCurrSet(1);
+            };
+
+            const updateEx = (id, field, val) => {
+                setExercises(exercises.map(ex => ex.id === id ? { ...ex, [field]: val } : ex));
             };
 
             const moveEx = (idx, dir) => {
@@ -298,138 +273,92 @@
                 setExercises(copy);
             };
 
-            const activatePlan = (day) => {
-                const plan = planner[day];
-                setActiveDay(day);
-                setActiveFocus(plan.focus || '');
-                if (plan.type === 'cardio') {
-                    setExercises([{ id: 'c-1', name: `${plan.activity} Session`, muscle: 'Full Body', completed: false, sets: [createNewSet('30m')] }]);
-                } else {
-                    setExercises(plan.exercises.map(ex => ({ ...ex, completed: false })));
-                }
-                setActiveTab('program');
-                setExpandedDay(null);
-                resetTimer();
-            };
-
-            const factoryReset = () => {
-                if(confirm("Factory Reset: This will clear ALL history, plans, and exercises permanently. Proceed?")) {
-                    localStorage.clear();
-                    window.location.reload();
-                }
-            };
-
-            const cycleHistoryMuscle = (histId, muscleKey) => {
-                setHistory(history.map(h => {
-                    if (h.id === histId) {
-                        const newVolume = { ...(h.volume || {}) };
-                        const count = newVolume[muscleKey] || 0;
-                        delete newVolume[muscleKey];
-                        const nextMuscle = MUSCLE_GROUPS[(MUSCLE_GROUPS.indexOf(muscleKey) + 1) % MUSCLE_GROUPS.length];
-                        newVolume[nextMuscle] = (newVolume[nextMuscle] || 0) + count;
-                        return { ...h, volume: newVolume };
-                    }
-                    return h;
-                }));
-            };
-
             const weeklyStats = (() => {
-                try {
-                    const start = new Date(); start.setDate(start.getDate() - start.getDay()); start.setHours(0,0,0,0);
-                    const week = history.filter(h => h && h.timestamp && h.timestamp >= start.getTime());
-                    const muscleVol = {}; let sets = 0;
-                    week.forEach(w => { 
-                        sets += (w.totalSets || 0); 
-                        Object.entries(w.volume || {}).forEach(([m, c]) => muscleVol[m] = (muscleVol[m] || 0) + c); 
-                    });
-                    return { workouts: week.length, sets, muscles: muscleVol };
-                } catch (e) {
-                    return { workouts: 0, sets: 0, muscles: {} };
-                }
+                const start = new Date(); start.setDate(start.getDate() - start.getDay()); start.setHours(0,0,0,0);
+                const week = history.filter(h => h && h.timestamp && h.timestamp >= start.getTime());
+                const muscleVol = {}; let totalSets = 0;
+                week.forEach(w => { totalSets += (w.sets || 0); Object.entries(w.vol || {}).forEach(([m, c]) => muscleVol[m] = (muscleVol[m] || 0) + c); });
+                return { workouts: week.length, sets: totalSets, muscles: muscleVol };
             })();
 
             return (
-                <div className="min-h-screen bg-black text-white pb-40 safe-area-inset-bottom">
-                    {/* Bulk Modal */}
-                    {showBulkModal && (
-                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
-                            <div className="bg-zinc-900 w-full max-w-md border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl animate-in">
-                                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-cyan-400"><ClipboardList /> Import</h3>
-                                <textarea autoFocus value={bulkInput} onChange={e => setBulkInput(e.target.value)} placeholder="Exercise names... One per line" className="w-full h-48 bg-black border border-zinc-800 rounded-2xl p-4 mb-4 outline-none text-white font-medium" />
-                                <button onClick={handleBulkImport} className="w-full bg-cyan-500 text-black font-black py-5 rounded-2xl active:scale-95 shadow-lg shadow-cyan-500/20">CONFIRM</button>
-                                <button onClick={() => setShowBulkModal(false)} className="w-full mt-2 py-4 text-zinc-500 font-bold text-sm">CANCEL</button>
+                <div className="min-h-screen bg-black text-white pb-32 safe-area-inset-bottom">
+                    {bulk.show && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md animate-in px-4">
+                            <div className="bg-zinc-900 w-full max-w-md border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl">
+                                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-cyan-400 font-mono"><ClipboardList /> Batch Import</h3>
+                                <textarea autoFocus value={bulk.input} onChange={e => setBulk({...bulk, input: e.target.value})} placeholder="One exercise per line..." className="w-full h-48 bg-black border border-zinc-800 rounded-2xl p-4 mb-4 outline-none text-white font-medium" />
+                                <button onClick={() => { 
+                                    const lines = bulk.input.split('\n').filter(l => l.trim() !== "");
+                                    const mapped = lines.map(n => ({ id: Math.random().toString(36).substr(2,9), name: n.trim(), muscle: detectMuscle(n.trim()), completed: false, sets: [createNewSet()] }));
+                                    if (bulk.target === 'active') setExercises([...exercises, ...mapped]);
+                                    else setPlanner({...planner, [bulk.target]: {...planner[bulk.target], exercises: [...(planner[bulk.target].exercises || []), ...mapped]}});
+                                    setBulk({ show: false, target: 'active', input: '' });
+                                }} className="w-full bg-cyan-500 text-black font-black py-5 rounded-2xl active:scale-95 shadow-lg uppercase tracking-widest text-sm">Inject moves</button>
+                                <button onClick={() => setBulk({...bulk, show: false})} className="w-full mt-2 py-4 text-zinc-600 font-bold text-sm uppercase">Cancel</button>
                             </div>
                         </div>
                     )}
 
                     <div className="max-w-xl mx-auto px-5 pt-12 animate-in">
-                        {/* Header */}
-                        <div className="flex justify-between items-center mb-10 px-2">
+                        <div className="flex justify-between items-start mb-10 px-2">
                             <div>
                                 <h1 className="text-3xl font-black italic tracking-tighter">IRON<span className="text-cyan-400">FOCUS</span></h1>
-                                <div className="flex items-center gap-2 mt-1">
-                                    {sessionActive && <div className="h-2 w-2 rounded-full bg-cyan-500 animate-pulse" />}
-                                    <span className="text-zinc-500 font-bold text-[10px] uppercase tracking-[0.2em]">{sessionActive ? formatDuration(sessionTime) : 'Ready to train'}</span>
-                                </div>
+                                {isLive && <div className="text-zinc-500 font-bold text-[10px] uppercase tracking-widest mt-1 flex items-center gap-2"><ClockIcon size={12} className="text-cyan-500"/> {formatDur(sessionTime)}</div>}
                             </div>
-                            <button onClick={() => setIsAudioEnabled(!isAudioEnabled)} className={`p-3 rounded-2xl border transition-all ${isAudioEnabled ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}>
-                                {isAudioEnabled ? <Volume2 /> : <VolumeX />}
+                            <button onClick={() => setIsAudio(!isAudio)} className={`p-3 rounded-2xl border transition-all ${isAudio ? 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500'}`}>
+                                {isAudio ? <Volume2 /> : <VolumeX />}
                             </button>
                         </div>
 
                         {/* --- TRAIN TAB --- */}
                         {activeTab === 'program' && (
                             <div className="space-y-6">
-                                <div className="flex flex-col gap-3 px-1">
-                                    <div className="flex items-center gap-3 bg-zinc-900/50 px-5 py-3 rounded-[1.5rem] border border-zinc-800 shadow-inner">
+                                <div className="px-1 flex flex-col gap-4">
+                                    <div className="flex items-center gap-3 bg-zinc-900/50 px-5 py-3 rounded-2xl border border-zinc-800 shadow-inner">
                                         <Edit size={16} className="text-zinc-600" />
-                                        <input 
-                                            value={activeFocus} 
-                                            onChange={e => setActiveFocus(e.target.value)}
-                                            placeholder={activeDay ? `${activeDay} Focus...` : "Workout Focus Name..."}
-                                            className="bg-transparent border-none p-0 text-sm font-black uppercase tracking-widest text-zinc-200 focus:ring-0 w-full"
-                                        />
+                                        <input value={activeFocus} onChange={e => setActiveFocus(e.target.value)} placeholder="Session Focus..." className="bg-transparent border-none p-0 text-sm font-black uppercase tracking-widest text-zinc-200 focus:ring-0 w-full" />
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-zinc-500">Live Workspace</h2>
+                                        <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Live Workspace</h2>
                                         <div className="flex gap-2">
-                                            <button onClick={() => { setBulkTarget('active'); setShowBulkModal(true); }} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 text-zinc-400"><ClipboardList size={20}/></button>
-                                            <button onClick={finishWorkoutAction} className="bg-zinc-900 px-5 py-2.5 rounded-xl border border-zinc-700 active:scale-95 text-white shadow-lg"><Flag size={18}/></button>
-                                            <button onClick={() => setExercises([...exercises, { id: Math.random().toString(36).substr(2,9), name: 'New Exercise', muscle: 'Full Body', completed: false, sets: [createNewSet()] }])} className="bg-cyan-500 text-black px-5 py-2.5 rounded-xl shadow-lg active:scale-95"><Plus size={18}/></button>
+                                            <button onClick={() => setBulk({ show: true, target: 'active', input: '' })} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 text-zinc-400"><ClipboardList size={20}/></button>
+                                            <button onClick={finishWorkout} className="bg-zinc-900 px-5 py-2.5 rounded-xl border border-zinc-700 text-white active:scale-95 shadow-lg"><Flag size={18}/></button>
+                                            <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: [createNewSet()] }])} className="bg-cyan-500 text-black px-5 py-2.5 rounded-xl active:scale-95 shadow-lg shadow-cyan-500/20"><Plus size={18}/></button>
                                         </div>
                                     </div>
                                 </div>
-
                                 <div className="space-y-5">
-                                    {exercises.map((ex, exIdx) => (
+                                    {exercises.map((ex, idx) => (
                                         <div key={ex.id} className={`bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-6 shadow-xl relative transition-all ${ex.completed ? 'opacity-30 scale-[0.98]' : ''}`}>
                                             <div className="flex justify-between items-start mb-4">
                                                 <div className="flex gap-4 items-start flex-1">
-                                                    <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, completed: !x.completed} : x))}>
-                                                        {ex.completed ? <CheckCircle2 className="text-cyan-400" size={28} /> : <Circle className="text-zinc-700" size={28} />}
-                                                    </button>
+                                                    <button onClick={() => {
+                                                        const upd = exercises.map(x => x.id === ex.id ? {...x, completed: !x.completed} : x);
+                                                        setExercises(upd);
+                                                        if (!ex.completed && exercises[currIdx]?.id === ex.id && timerActive) setTimeout(() => handleTransition('NEXT'), 400);
+                                                    }}>{ex.completed ? <div className="bg-cyan-500 p-1.5 rounded-full text-black"><Check size={20}/></div> : <div className="h-7 w-7 rounded-full border-2 border-zinc-800" />}</button>
                                                     <div className="flex-1">
-                                                        <input value={ex.name} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, name: e.target.value} : x))} className="bg-transparent border-none p-0 text-xl font-bold w-full text-white focus:ring-0" />
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <div className="bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase px-2 py-1 rounded-lg">{ex.muscle}</div>
-                                                        </div>
+                                                        <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name: e.target.value}:x))} className="bg-transparent border-none p-0 text-xl font-bold w-full text-white focus:ring-0" />
+                                                        <div className="bg-cyan-500/10 text-cyan-400 text-[10px] font-black uppercase px-2 py-1 rounded-lg mt-1 inline-block">{ex.muscle}</div>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="p-1 text-red-900/30"><Trash2 size={16}/></button>
+                                                <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="text-zinc-800 p-1"><Trash2 size={16}/></button>
                                             </div>
                                             <div className="grid grid-cols-12 gap-2 text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-2 px-2">
-                                                <div className="col-span-1">Set</div><div className="col-span-3 text-center">TGT</div><div className="col-span-4 text-center kg-text">Weight</div><div className="col-span-4 text-center reps-text">Reps</div>
+                                                <div className="col-span-1">#</div><div className="col-span-3">Goal</div><div className="col-span-3 text-center kg-glow">KG</div><div className="col-span-3 text-center reps-glow">Reps</div><div className="col-span-2"></div>
                                             </div>
                                             <div className="space-y-2">
                                                 {(ex.sets || []).map((s, i) => (
                                                     <div key={s.id} className="grid grid-cols-12 gap-2 items-center bg-black/40 p-2.5 rounded-2xl border border-zinc-800/40">
                                                         <div className="col-span-1 text-center font-bold text-zinc-700 text-xs">{i+1}</div>
-                                                        <div className="col-span-3 text-center text-xs font-black text-zinc-400">{s.targetReps}</div>
-                                                        <input type="number" value={s.weight} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.map(st => st.id === s.id ? {...st, weight: e.target.value} : st)} : x))} className="col-span-4 bg-zinc-800/80 rounded-xl py-3 text-center text-sm font-black kg-text focus:ring-1 focus:ring-cyan-500" placeholder="0" />
-                                                        <input type="number" value={s.actualReps} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.map(st => st.id === s.id ? {...st, actualReps: e.target.value} : st)} : x))} className="col-span-4 bg-zinc-800/80 rounded-xl py-3 text-center text-sm font-black reps-text focus:ring-1 focus:ring-green-500" placeholder="0" />
+                                                        <div className="col-span-3 text-center text-xs font-black text-zinc-400">{s.target}</div>
+                                                        <input type="number" value={s.weight} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.map(st => st.id === s.id ? {...st, weight: e.target.value} : st)} : x))} className="col-span-3 bg-zinc-800/80 rounded-xl py-3 text-center text-sm font-black focus:ring-1 focus:ring-cyan-500 text-white" placeholder="0" />
+                                                        <input type="number" value={s.reps} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.map(st => st.id === s.id ? {...st, reps: e.target.value} : st)} : x))} className="col-span-3 bg-zinc-800/80 rounded-xl py-3 text-center text-sm font-black focus:ring-1 focus:ring-green-500" placeholder="0" />
+                                                        <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.filter(st => st.id !== s.id)} : x))} className="col-span-2 flex justify-center text-red-900/30 active:scale-90"><X size={14}/></button>
                                                     </div>
                                                 ))}
-                                                <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: [...(x.sets||[]), createNewSet()]} : x))} className="w-full py-3 border border-dashed border-zinc-800 rounded-2xl text-[10px] font-black text-zinc-600 hover:text-cyan-500 transition-all uppercase tracking-widest">+ Set</button>
+                                                <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: [...(x.sets||[]), createNewSet()]} : x))} className="w-full py-3 border border-dashed border-zinc-800 rounded-2xl text-[10px] font-black text-zinc-700 hover:text-cyan-500 transition-all">+ Add Set</button>
                                             </div>
                                         </div>
                                     ))}
@@ -439,70 +368,53 @@
 
                         {/* --- TIMER TAB --- */}
                         {activeTab === 'timer' && (
-                            <div className="space-y-6 flex flex-col items-center animate-in">
+                            <div className="space-y-10 animate-in">
                                 {exercises.length > 0 && (
-                                    <div className="w-full space-y-6">
-                                        <div className="w-full bg-zinc-900 border border-zinc-800 rounded-[3rem] p-8 text-center relative overflow-hidden shadow-2xl">
+                                    <div className="w-full space-y-10 flex flex-col items-center">
+                                        <div className="w-full bg-zinc-900 border border-zinc-800 rounded-[3.5rem] p-9 text-center relative overflow-hidden shadow-2xl">
                                             <div className="absolute top-0 left-0 w-full h-1.5 bg-zinc-800">
-                                                <div className={`h-full transition-all duration-700 ${timerMode === 'WORK' ? 'bg-cyan-500' : 'bg-amber-500'}`} style={{ width: `${((currExIdx + 1) / exercises.length) * 100}%` }} />
+                                                <div className={`h-full transition-all duration-700 ${timerMode === 'WORK' ? 'bg-cyan-500' : 'bg-amber-500'}`} style={{ width: `${((currIdx + 1) / exercises.length) * 100}%` }} />
                                             </div>
                                             <span className={`text-[10px] font-black uppercase tracking-[0.3em] mb-2 block ${timerMode === 'WORK' ? 'text-cyan-400' : 'text-amber-500'}`}>{timerMode}</span>
-                                            <h3 className="text-4xl font-black mb-1 truncate px-2">{exercises[currExIdx]?.name}</h3>
-                                            
+                                            <h3 className="text-4xl font-black mb-1 truncate px-2">{exercises[currIdx]?.name}</h3>
                                             {timerMode !== 'COMPLETED' && (
-                                                <div className="mt-8 grid grid-cols-2 gap-4 bg-black/40 p-5 rounded-3xl border border-zinc-800/50">
-                                                    <div>
-                                                        <label className="text-[10px] font-black text-cyan-400 uppercase tracking-widest block mb-2">Set {currCycle} KG</label>
-                                                        <input type="number" value={exercises[currExIdx]?.sets[currCycle-1]?.weight || ""} 
-                                                            onChange={e => setExercises(exercises.map(ex => ex.id === exercises[currExIdx].id ? {...ex, sets: ex.sets.map(st => st.id === exercises[currExIdx].sets[currCycle-1].id ? {...st, weight: e.target.value} : st)} : ex))}
-                                                            className="w-full bg-zinc-800 rounded-2xl py-4 text-center text-2xl font-black border-none focus:ring-2 focus:ring-cyan-500 text-white" placeholder="0" 
-                                                        />
+                                                <div className="mt-10 grid grid-cols-2 gap-5 bg-black/50 p-6 rounded-[2rem] border border-zinc-800/50 shadow-inner">
+                                                    <div><label className="text-[10px] font-black text-cyan-400 uppercase block mb-1 text-center">KG</label>
+                                                        <input type="number" value={(exercises[currIdx]?.sets || [])[currSet-1]?.weight || ""} onChange={e => setExercises(exercises.map(ex => ex.id === exercises[currIdx].id ? {...ex, sets: (ex.sets||[]).map(st => st.id === (exercises[currIdx].sets || [])[currSet-1].id ? {...st, weight: e.target.value} : st)} : ex))} className="w-full bg-zinc-800 rounded-2xl py-4 text-center text-3xl font-black border-none focus:ring-2 focus:ring-cyan-500 text-white shadow-xl" placeholder="0" />
                                                     </div>
-                                                    <div>
-                                                        <label className="text-[10px] font-black text-green-400 uppercase tracking-widest block mb-2">REPS</label>
-                                                        <input type="number" value={exercises[currExIdx]?.sets[currCycle-1]?.actualReps || ""} 
-                                                            onChange={e => setExercises(exercises.map(ex => ex.id === exercises[currExIdx].id ? {...ex, sets: ex.sets.map(st => st.id === exercises[currExIdx].sets[currCycle-1].id ? {...st, actualReps: e.target.value} : st)} : ex))}
-                                                            className="w-full bg-zinc-800 rounded-2xl py-4 text-center text-2xl font-black border-none focus:ring-2 focus:ring-green-500 text-white" placeholder="0" 
-                                                        />
+                                                    <div><label className="text-[10px] font-black text-green-400 uppercase block mb-1 text-center">Reps</label>
+                                                        <input type="number" value={(exercises[currIdx]?.sets || [])[currSet-1]?.reps || ""} onChange={e => setExercises(exercises.map(ex => ex.id === exercises[currIdx].id ? {...ex, sets: (ex.sets||[]).map(st => st.id === (exercises[currIdx].sets || [])[currSet-1].id ? {...st, reps: e.target.value} : st)} : ex))} className="w-full bg-zinc-800 rounded-2xl py-4 text-center text-3xl font-black text-green-400 border-none focus:ring-2 focus:ring-green-500 shadow-xl" placeholder="0" />
                                                     </div>
                                                 </div>
                                             )}
                                         </div>
-
-                                        <div className="relative flex items-center justify-center active-ring">
-                                            <svg className="w-72 h-72 transform -rotate-90">
-                                                <circle cx="144" cy="144" r="130" stroke="currentColor" strokeWidth="16" fill="transparent" className="text-zinc-900" />
-                                                <circle cx="144" cy="144" r="130" stroke="currentColor" strokeWidth="16" strokeLinecap="round" fill="transparent" strokeDasharray={816} 
-                                                    strokeDashoffset={816 - (timeLeft / (timerSettings[timerMode === 'WORK' ? 'work' : timerMode === 'REST_SET' ? 'restSet' : 'restEx'] || 10)) * 816} 
-                                                    className={`transition-all duration-1000 ease-linear ${timerMode === 'WORK' ? 'text-cyan-400' : 'text-amber-500'}`} 
-                                                />
+                                        <div className="relative flex items-center justify-center active-timer-ring">
+                                            <svg className="w-80 h-80 transform -rotate-90">
+                                                <circle cx="160" cy="160" r="145" stroke="currentColor" strokeWidth="18" fill="transparent" className="text-zinc-900" />
+                                                <circle cx="160" cy="160" r="145" stroke="currentColor" strokeWidth="18" strokeLinecap="round" fill="transparent" strokeDasharray={911} strokeDashoffset={911 - (timeLeft / (timerSettings[timerMode === 'WORK' ? 'work' : timerMode === 'REST_SET' ? 'restSet' : 'restEx'] || 10)) * 911} className={`transition-all duration-1000 ease-linear ${timerMode === 'WORK' ? 'text-cyan-400' : 'text-amber-500'}`} />
                                             </svg>
-                                            <div className="absolute flex flex-col items-center">
-                                                <span className="text-8xl font-black font-mono tracking-tighter text-white tabular-nums">{timeLeft}</span>
-                                                <span className="text-[10px] font-bold text-zinc-500 mt-2 uppercase tracking-widest">Cycle {currCycle} of {exercises[currExIdx]?.sets?.length || 1}</span>
-                                            </div>
+                                            <div className="absolute flex flex-col items-center"><span className="text-[11rem] leading-none font-black font-mono tracking-tighter text-white tabular-nums">{timeLeft}</span><span className="text-[12px] font-bold text-zinc-500 mt-2 uppercase tracking-[0.4em]">Set {currSet} of {(exercises[currIdx]?.sets || []).length || 1}</span></div>
                                         </div>
-
-                                        <div className="flex gap-4 w-full px-2">
-                                            <button onClick={() => handlePhaseShift('PREV')} className="flex-1 bg-zinc-900 py-8 rounded-[2.5rem] active:scale-90 flex justify-center text-zinc-500 border border-zinc-800"><SkipBack size={36}/></button>
-                                            <button onClick={() => { setIsActive(!isActive); if(!sessionActive) setSessionActive(true); }} className={`flex-[2.5] py-8 rounded-[2.5rem] font-black text-2xl active:scale-95 shadow-2xl flex items-center justify-center gap-4 transition-all ${isActive ? 'bg-zinc-800 text-white' : 'bg-white text-black'}`}>
-                                                {isActive ? <Pause fill="currentColor" size={36}/> : <Play fill="currentColor" size={36}/>} {isActive ? "PAUSE" : "START"}
-                                            </button>
-                                            <button onClick={() => handlePhaseShift('NEXT')} className="flex-1 bg-zinc-900 py-8 rounded-[2.5rem] active:scale-90 flex justify-center text-zinc-500 border border-zinc-800"><SkipForward size={36}/></button>
+                                        <div className="flex gap-5 w-full px-2">
+                                            <button onClick={() => handleTransition('PREV')} className="flex-1 bg-zinc-900 py-10 rounded-[3rem] active:scale-90 flex justify-center text-zinc-600 border border-zinc-800"><SkipBack size={44}/></button>
+                                            <button onClick={() => { setTimerActive(!timerActive); if(!isLive) setIsLive(true); enableAudioEngine(); }} className={`flex-[2.5] py-10 rounded-[3rem] font-black text-3xl active:scale-95 shadow-2xl flex items-center justify-center gap-5 transition-all ${timerActive ? 'bg-zinc-800 text-white' : 'bg-white text-black'}`}>{timerActive ? <Pause fill="currentColor" size={44}/> : <Play fill="currentColor" size={44}/>} {timerActive ? "PAUSE" : "START"}</button>
+                                            <button onClick={() => handleTransition('NEXT')} className="flex-1 bg-zinc-900 py-10 rounded-[3rem] active:scale-90 flex justify-center text-zinc-600 border border-zinc-800"><SkipForward size={44}/></button>
                                         </div>
                                     </div>
                                 )}
-
-                                <div className="w-full bg-zinc-900 border border-zinc-800 rounded-[2.5rem] p-7 shadow-2xl">
-                                    <h3 className="text-[10px] font-black uppercase text-cyan-400 mb-5 tracking-[0.2em] flex items-center gap-2"><ClipboardList size={14}/> Queue Visibility</h3>
-                                    <div className="space-y-3 max-h-[300px] overflow-y-auto no-scrollbar">
+                                <div className="w-full bg-zinc-900 border border-zinc-800 rounded-[3rem] p-8 shadow-2xl space-y-6">
+                                    <h3 className="text-[11px] font-black uppercase text-cyan-400 mb-5 tracking-[0.3em] flex items-center gap-2"><ClipboardList size={16}/> Live Queue</h3>
+                                    <div className="space-y-4 max-h-[500px] overflow-y-auto no-scrollbar pb-4">
                                         {exercises.map((ex, i) => (
-                                            <div key={ex.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 ${currExIdx === i ? 'border-cyan-500/50 bg-cyan-500/5' : 'bg-black/30 border-zinc-800/50'}`}>
-                                                <span className={`text-xs font-black w-5 text-center ${currExIdx === i ? 'text-cyan-400' : 'text-zinc-700'}`}>{i+1}</span>
-                                                <span className={`flex-1 text-sm font-bold truncate ${ex.completed ? 'line-through text-zinc-600' : 'text-zinc-300'}`}>{ex.name}</span>
-                                                <div className="flex gap-1.5">
-                                                    <button onClick={() => moveEx(i, -1)} className="p-2 bg-zinc-800 rounded-xl active:bg-cyan-500"><ChevronUp size={16}/></button>
-                                                    <button onClick={() => moveEx(i, 1)} className="p-2 bg-zinc-800 rounded-xl active:bg-cyan-500"><ChevronDown size={16}/></button>
+                                            <div key={ex.id} className={`flex flex-col gap-3 p-6 rounded-[2.2rem] border transition-all ${currIdx === i ? 'border-cyan-500/60 bg-cyan-500/10 active-timer-ring scale-[1.02]' : 'bg-black/30 border-zinc-800/50 opacity-60'}`}>
+                                                <div className="flex items-center gap-4">
+                                                    <span className={`text-sm font-black w-6 text-center ${currIdx === i ? 'text-cyan-400' : 'text-zinc-700'}`}>{i+1}</span>
+                                                    <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name: e.target.value}:x))} className={`flex-1 bg-transparent border-none p-0 text-md font-bold focus:ring-0 ${ex.completed ? 'line-through text-zinc-600' : 'text-zinc-200'}`} />
+                                                    <div className="flex gap-1.5"><button onClick={() => moveEx(i, -1)} className="p-2.5 bg-zinc-800 rounded-xl active:bg-cyan-500"><ChevronUp size={20}/></button><button onClick={() => moveEx(i, 1)} className="p-2.5 bg-zinc-800 rounded-xl active:bg-cyan-500"><ChevronDown size={20}/></button></div>
+                                                </div>
+                                                <div className="flex justify-between items-center pl-10 pr-2">
+                                                    <select value={ex.muscle} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, muscle: e.target.value}:x))} className="bg-zinc-800 text-cyan-400 text-[9px] font-black uppercase px-3 py-1.5 rounded-lg border-none w-32">{MUSCLE_GROUPS.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                                                    <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="text-red-900/40 active:text-red-500 transition-colors"><Trash2 size={16}/></button>
                                                 </div>
                                             </div>
                                         ))}
@@ -513,70 +425,67 @@
 
                         {activeTab === 'planner' && (
                             <div className="space-y-6 animate-in">
-                                <h2 className="text-xl font-bold tracking-tight mb-8">Weekly Blueprint</h2>
+                                <h2 className="text-xl font-bold tracking-tight mb-8 px-1">Weekly Blueprint</h2>
                                 {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(d => (
-                                    <div key={d} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden shadow-xl">
+                                    <div key={d} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden shadow-xl transition-all">
                                         <div className="p-7 flex justify-between items-center" onClick={() => setExpandedDay(expandedDay === d ? null : d)}>
                                             <div className="flex items-center gap-5">
-                                                <div className={`p-4 rounded-2xl shadow-inner ${planner[d].type === 'cardio' ? 'bg-purple-500/10 text-purple-400' : 'bg-cyan-500/10 text-cyan-400'}`}>
-                                                    {planner[d].type === 'cardio' ? <Activity size={22}/> : <Dumbbell size={22}/>}
-                                                </div>
+                                                <div className={`p-4 bg-cyan-500/10 text-cyan-400 rounded-2xl shadow-inner`}><LayoutGrid size={22}/></div>
                                                 <div>
                                                     <h3 className="font-bold text-xl">{d}</h3>
-                                                    <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">{planner[d].focus || (planner[d].type === 'cardio' ? planner[d].activity : 'Strength')}</p>
+                                                    <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">{planner[d].focus || (planner[d].type === 'cardio' ? planner[d].activity : 'Blueprint')}</p>
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-4">
-                                                <button onClick={(e) => { e.stopPropagation(); activatePlan(d); }} className="bg-white text-black text-[11px] font-black px-6 py-2.5 rounded-xl shadow-xl">LOAD</button>
-                                                <div className={`transition-transform ${expandedDay === d ? 'rotate-180' : ''}`}><ChevronDown size={22} className="text-zinc-700"/></div>
+                                                <button onClick={(e) => { e.stopPropagation(); activatePlan(d); }} className="bg-white text-black text-[11px] font-black px-6 py-2.5 rounded-xl shadow-xl active:scale-95">LOAD</button>
+                                                <div className={`transition-transform duration-300 ${expandedDay === d ? 'rotate-180' : ''}`}><ChevronDown size={22} className="text-zinc-700"/></div>
                                             </div>
                                         </div>
                                         {expandedDay === d && (
-                                            <div className="px-7 pb-8 pt-3 space-y-6 border-t border-zinc-800/50 animate-in">
-                                                <div className="space-y-2">
-                                                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest px-1">Workout Focus Name</label>
-                                                    <input 
-                                                        value={planner[d].focus} 
-                                                        onChange={e => setPlanner({...planner, [d]: {...planner[d], focus: e.target.value}})}
-                                                        placeholder="e.g. Chest and Tri's"
-                                                        className="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-cyan-500 text-white"
-                                                    />
-                                                </div>
+                                            <div className="px-7 pb-8 pt-4 space-y-6 border-t border-zinc-800/50 animate-in">
+                                                <input value={planner[d].focus} onChange={e => setPlanner({...planner, [d]: {...planner[d], focus: e.target.value}})} placeholder="Focus (e.g. Back/Bi)" className="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm font-bold focus:ring-2 focus:ring-cyan-500 text-white shadow-inner" />
+                                                
+                                                {/* Strength vs Cardio Toggle */}
                                                 <div className="flex gap-4 p-2 bg-black/40 rounded-2xl">
-                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], type: 'strength'}})} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${planner[d].type === 'strength' ? 'bg-zinc-800 text-cyan-400' : 'text-zinc-600'}`}>Strength</button>
-                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], type: 'cardio'}})} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${planner[d].type === 'cardio' ? 'bg-zinc-800 text-purple-400' : 'text-zinc-600'}`}>Cardio</button>
+                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], type: 'strength'}})} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${planner[d].type === 'strength' ? 'bg-zinc-800 text-cyan-400 shadow-inner' : 'text-zinc-600'}`}>Strength</button>
+                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], type: 'cardio'}})} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase transition-all ${planner[d].type === 'cardio' ? 'bg-zinc-800 text-purple-400 shadow-inner' : 'text-zinc-600'}`}>Cardio</button>
                                                 </div>
+
                                                 {planner[d].type === 'strength' ? (
                                                     <div className="space-y-4">
-                                                        <div className="flex justify-between items-center px-1">
-                                                            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Exercise List</span>
-                                                            <button onClick={() => { setBulkTarget(d); setShowBulkModal(true); }} className="text-cyan-400 text-[10px] font-black uppercase flex items-center gap-1.5"><ClipboardList size={14}/> Bulk</button>
-                                                        </div>
+                                                        <div className="flex justify-between items-center px-1"><span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest">Base Routine</span><button onClick={() => setBulk({ show: true, target: d, input: '' })} className="text-cyan-400 text-[10px] font-black uppercase flex items-center gap-1.5"><ClipboardList size={14}/> Bulk</button></div>
                                                         {(planner[d].exercises || []).map(ex => (
-                                                            <div key={ex.id} className="bg-black/50 p-5 rounded-[2rem] border border-zinc-800/50 space-y-4">
+                                                            <div key={ex.id} className="bg-black/50 p-5 rounded-[2rem] border border-zinc-800/50 space-y-4 shadow-inner">
                                                                 <div className="flex gap-3">
                                                                     <input value={ex.name} onChange={e => {
-                                                                        const upd = planner[d].exercises.map(x => x.id === ex.id ? {...x, name: e.target.value} : x);
+                                                                        const upd = (planner[d].exercises || []).map(x => x.id === ex.id ? {...x, name: e.target.value} : x);
                                                                         setPlanner({...planner, [d]: {...planner[d], exercises: upd}});
                                                                     }} className="flex-1 bg-transparent border-none text-md font-bold p-0 text-white focus:ring-0" />
-                                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: planner[d].exercises.filter(x => x.id !== ex.id)}})} className="text-zinc-800"><X size={18}/></button>
+                                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: (planner[d].exercises || []).filter(x => x.id !== ex.id)}})} className="text-zinc-800"><X size={18}/></button>
                                                                 </div>
                                                                 <div className="flex gap-2 flex-wrap">
                                                                     {MUSCLE_GROUPS.map(m => (
                                                                         <button key={m} onClick={() => {
-                                                                            const upd = planner[d].exercises.map(x => x.id === ex.id ? {...x, muscle: m} : x);
+                                                                            const upd = (planner[d].exercises || []).map(x => x.id === ex.id ? {...x, muscle: m} : x);
                                                                             setPlanner({...planner, [d]: {...planner[d], exercises: upd}});
-                                                                        }} className={`px-2 py-1 rounded-lg text-[8px] font-black uppercase border transition-all ${ex.muscle === m ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'border-zinc-800 text-zinc-600'}`}>{m}</button>
+                                                                        }} className={`px-2 py-1.5 rounded-xl text-[8px] font-black uppercase border transition-all ${ex.muscle === m ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50' : 'border-zinc-800 text-zinc-600'}`}>{m}</button>
                                                                     ))}
                                                                 </div>
                                                             </div>
                                                         ))}
+                                                        <button onClick={() => {
+                                                            const newEx = { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: [createNewSet()] };
+                                                            setPlanner({...planner, [d]: {...planner[d], exercises: [...(planner[d].exercises || []), newEx]}});
+                                                        }} className="w-full py-5 border border-dashed border-zinc-800 rounded-[2rem] text-[11px] font-black uppercase text-zinc-700 hover:text-cyan-400 shadow-inner">+ Single Add</button>
                                                     </div>
                                                 ) : (
-                                                    <div className="grid grid-cols-3 gap-3 animate-in">
-                                                        {['Run', 'Bike', 'Swim'].map(t => (
-                                                            <button key={t} onClick={() => setPlanner({...planner, [d]: {...planner[d], activity: t}})} className={`py-4 rounded-2xl font-black uppercase text-xs border transition-all ${planner[d].activity === t ? 'bg-purple-500 text-white border-purple-400' : 'bg-black border-zinc-800 text-zinc-600'}`}>{t}</button>
-                                                        ))}
+                                                    <div className="space-y-4 animate-in">
+                                                        <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-1">Cardio Selection</span>
+                                                        <div className="grid grid-cols-3 gap-3">
+                                                            {CARDIO_TYPES.map(t => (
+                                                                <button key={t} onClick={() => setPlanner({...planner, [d]: {...planner[d], activity: t}})} className={`py-5 rounded-[1.5rem] font-black uppercase text-xs border transition-all ${planner[d].activity === t ? 'bg-purple-500 text-white border-purple-400 shadow-lg' : 'bg-black border-zinc-800 text-zinc-600'}`}>{t}</button>
+                                                            ))}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -590,80 +499,74 @@
                             <div className="space-y-8 animate-in pb-20">
                                 <div className="bg-zinc-900 border border-zinc-800 rounded-[3rem] p-9 shadow-2xl relative overflow-hidden group">
                                     <Award className="absolute -right-4 -bottom-4 w-32 h-32 text-cyan-500/10 group-hover:scale-110 transition-transform" />
-                                    <h2 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                                        <div className="h-2 w-2 bg-cyan-500 rounded-full animate-pulse" /> Weekly Report
-                                    </h2>
-                                    <div className="grid grid-cols-2 gap-5 mb-10">
-                                        <div className="bg-black/50 p-7 rounded-[2rem] border border-zinc-800/50 text-center shadow-inner">
+                                    <h2 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-4 flex items-center gap-2"><div className="h-2 w-2 bg-cyan-500 rounded-full animate-pulse" /> Weekly Summary</h2>
+                                    <div className="grid grid-cols-2 gap-6 mb-10">
+                                        <div className="bg-black/50 p-7 rounded-[2.5rem] border border-zinc-800/50 text-center shadow-inner">
                                             <div className="text-5xl font-black text-white">{weeklyStats.workouts || 0}</div>
-                                            <div className="text-[10px] font-bold text-zinc-500 uppercase mt-1">Sessions</div>
+                                            <div className="text-[10px] font-bold text-zinc-600 uppercase mt-2">Sessions</div>
                                         </div>
-                                        <div className="bg-black/50 p-7 rounded-[2rem] border border-zinc-800/50 text-center shadow-inner">
+                                        <div className="bg-black/50 p-7 rounded-[2.5rem] border border-zinc-800/50 text-center shadow-inner">
                                             <div className="text-5xl font-black text-white tracking-tighter">{weeklyStats.sets || 0}</div>
-                                            <div className="text-[10px] font-bold text-zinc-500 uppercase mt-1">Sets Done</div>
+                                            <div className="text-[10px] font-bold text-zinc-600 uppercase mt-2">Total Sets</div>
                                         </div>
                                     </div>
-                                    <div className="space-y-5">
+                                    <div className="space-y-4">
                                         {Object.entries(weeklyStats.muscles || {}).sort((a,b)=>b[1]-a[1]).map(([m, c]) => (
-                                            <div key={m} className="space-y-1.5">
-                                                <div className="flex justify-between text-[11px] font-black uppercase tracking-widest">
-                                                    <span>{m}</span><span className="text-cyan-400">{c} Sets</span>
-                                                </div>
-                                                <div className="h-1.5 w-full bg-black rounded-full overflow-hidden">
-                                                    <div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(c / Math.max(weeklyStats.sets, 1)) * 100}%` }} />
-                                                </div>
+                                            <div key={m} className="space-y-2">
+                                                <div className="flex justify-between text-[11px] font-black uppercase tracking-widest"><span>{m}</span><span className="text-cyan-400">{c} Sets</span></div>
+                                                <div className="h-1.5 w-full bg-black rounded-full overflow-hidden"><div className="h-full bg-cyan-500 transition-all duration-1000" style={{ width: `${(c / Math.max(weeklyStats.sets, 1)) * 100}%` }} /></div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                
-                                <div className="space-y-5">
-                                    <h3 className="text-lg font-bold px-3 flex items-center gap-3"><HistoryIcon size={20} className="text-cyan-400"/> Session Log</h3>
+                                <div className="space-y-6">
+                                    <h3 className="text-lg font-bold px-3 flex items-center gap-3"><HistoryIcon size={20} className="text-cyan-400"/> Training Archive</h3>
                                     {history.map(h => (
-                                        <div key={h.id} className="bg-zinc-900 border border-zinc-800 p-7 rounded-[2.5rem] flex flex-col gap-5 shadow-xl transition-transform active:scale-[0.98]">
+                                        <div key={h.id} className="bg-zinc-900 border border-zinc-800 p-8 rounded-[3rem] flex flex-col gap-6 shadow-xl relative transition-all active:scale-[0.98]">
                                             <div className="flex justify-between items-center">
                                                 <div className="flex-1">
                                                     <div className="text-[11px] font-black text-cyan-500 uppercase tracking-widest mb-1">{h.date}</div>
-                                                    <div className="text-xl font-black line-clamp-1">{h.focus || 'Session'}</div>
-                                                    <div className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Dur: {formatDuration(h.duration)}</div>
+                                                    <div className="text-2xl font-black line-clamp-1">{h.focus || 'Session'}</div>
+                                                    <div className="text-[10px] text-zinc-500 font-bold uppercase mt-2">Dur: {formatDur(h.dur || 0)}</div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <div className="text-right"><div className="text-3xl font-black">{h.totalSets || 0}</div><div className="text-[9px] font-black text-zinc-600 uppercase">Sets</div></div>
-                                                    <button onClick={() => setHistory(history.filter(x=>x.id!==h.id))} className="p-3 bg-black/40 rounded-2xl text-zinc-700 active:text-red-900"><Trash2 size={20}/></button>
+                                                <div className="flex items-center gap-5">
+                                                    <div className="text-right"><div className="text-4xl font-black">{h.sets || 0}</div><div className="text-[9px] font-black text-zinc-700 uppercase">Sets</div></div>
+                                                    <button onClick={() => setHistory(history.filter(x=>x.id!==h.id))} className="p-3 bg-black/40 rounded-2xl text-zinc-800 hover:text-red-900 transition-all"><Trash2 size={22}/></button>
                                                 </div>
                                             </div>
-                                            <div className="flex flex-wrap gap-2.5 pt-6 border-t border-zinc-800/50">
-                                                {Object.keys(h.volume || {}).map(vKey => (
-                                                    <button key={vKey} onClick={() => cycleHistoryMuscle(h.id, vKey)} className="px-4 py-2 bg-black/60 rounded-xl text-[10px] font-black uppercase border border-zinc-800 text-zinc-500 active:text-cyan-400">
-                                                        {vKey} ({h.volume[vKey]})
-                                                    </button>
-                                                ))}
+                                            <div className="pt-6 border-t border-zinc-800/50 space-y-4">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">Adjust Volume</span>
+                                                    {editHistId === h.id ? <button onClick={()=>setEditHistId(null)} className="text-cyan-400 text-[10px] font-black">DONE</button> : <button onClick={()=>setEditHistId(h.id)} className="text-zinc-400 text-[10px] font-black">EDIT</button>}
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {editHistId === h.id ? MUSCLE_GROUPS.map(m => (
+                                                        <div key={m} className="flex items-center bg-black/40 border border-zinc-800 rounded-xl px-3 py-2 gap-3">
+                                                            <span className="text-[9px] font-black uppercase text-zinc-400 min-w-[50px]">{m}</span>
+                                                            <button onClick={()=>editHistoryVolume(h.id, m, -1)} className="p-1 bg-zinc-800 rounded-lg text-red-500"><X size={10}/></button>
+                                                            <span className="text-[11px] font-black w-4 text-center">{h.vol ? h.vol[m] || 0 : 0}</span>
+                                                            <button onClick={()=>editHistoryVolume(h.id, m, 1)} className="p-1 bg-zinc-800 rounded-lg text-green-500"><Plus size={10}/></button>
+                                                        </div>
+                                                    )) : Object.entries(h.vol || {}).map(([m, c]) => c > 0 && (
+                                                        <div key={m} className="px-4 py-2 bg-black/60 rounded-xl text-[10px] font-black uppercase border border-zinc-800 text-zinc-500">{m}: {c}</div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
-                                </div>
-
-                                {/* CRITICAL RECOVERY TOOL */}
-                                <div className="pt-10 pb-5 px-4 text-center">
-                                    <button 
-                                        onClick={factoryReset}
-                                        className="flex items-center gap-2 mx-auto px-6 py-4 bg-red-900/20 text-red-500 rounded-2xl border border-red-900/30 text-[10px] font-black uppercase tracking-widest"
-                                    >
-                                        <AlertOctagon size={14} /> Clear Corrupted Cache
-                                    </button>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-md bg-zinc-900/90 backdrop-blur-3xl border border-zinc-800 rounded-[2.5rem] p-2 flex justify-between z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] ring-1 ring-white/5 pb-8 lg:pb-2">
+                    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-md bg-zinc-900/90 backdrop-blur-3xl border border-zinc-800 rounded-[3rem] p-2 flex justify-between z-50 shadow-[0_-10px_60px_rgba(0,0,0,1)] ring-1 ring-white/10 pb-8 lg:pb-2">
                         {[
                             { id: 'program', icon: <Dumbbell />, label: 'Train' },
                             { id: 'timer', icon: <TimerIcon />, label: 'Timer' },
                             { id: 'planner', icon: <LayoutGrid />, label: 'Plan' },
                             { id: 'dashboard', icon: <HistoryIcon />, label: 'Report' },
                         ].map((t) => (
-                            <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex-1 py-4 flex flex-col items-center rounded-[2.2rem] transition-all duration-300 ${activeTab === t.id ? 'text-cyan-400 bg-black border border-zinc-800 shadow-inner' : 'text-zinc-600'}`}>
+                            <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex-1 py-6 flex flex-col items-center rounded-[2.6rem] transition-all duration-300 ${activeTab === t.id ? 'text-cyan-400 bg-black border border-zinc-800 shadow-inner' : 'text-zinc-600'}`}>
                                 {t.icon}<span className="text-[9px] mt-1.5 uppercase font-black tracking-widest">{t.label}</span>
                             </button>
                         ))}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>IronFocus Pro 16.3</title>
+    <title>IronFocus Pro 16.5</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -81,7 +81,7 @@
         const Play = (p) => <Icon {...p}><polygon points="5 3 19 12 5 21 5 3"/></Icon>;
         const Pause = (p) => <Icon {...p}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></Icon>;
         const Plus = (p) => <Icon {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></Icon>;
-        const Trash2 = (p) => <Icon {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></Icon>;
+        const Trash2 = (p) => <Icon {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></Icon>;
         const Dumbbell = (p) => <Icon {...p}><path d="M6.5 6.5h11M6.5 17.5h11M3 10v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z"/></Icon>;
         const TimerIcon = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
         const HistoryIcon = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="12 7 12 12 16 14"/></Icon>;
@@ -96,13 +96,16 @@
         const SkipBack = (p) => <Icon {...p}><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></Icon>;
         const Download = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></Icon>;
         const ClipboardList = (p) => <Icon {...p}><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="16" x2="16" y2="16"/></Icon>;
+        const Edit = (p) => <Icon {...p}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></Icon>;
+        const ChevronUp = (p) => <Icon {...p}><polyline points="18 15 12 9 6 15"/></Icon>;
+        const ChevronDown = (p) => <Icon {...p}><polyline points="6 9 12 15 18 9"/></Icon>;
 
         // --- Library ---
         const MUSCLE_GROUPS = ['Chest', 'Back', 'Quads', 'Hamstrings', 'Shoulders', 'Biceps', 'Triceps', 'Abs', 'Calves', 'Glutes', 'Core', 'Full Body'];
         
         const detectMuscle = (n) => {
             const l = n.toLowerCase();
-            const map = { Chest: ['bench', 'chest', 'fly', 'pec'], Back: ['row', 'pull', 'lat', 'deadlift'], Triceps: ['tricep', 'skull', 'pushdown'], Biceps: ['bicep', 'curl', 'hammer'], Shoulders: ['shoulder', 'overhead', 'delt', 'landmine'], Quads: ['squat', 'leg press', 'quad'], Hamstrings: ['rdl', 'stiff', 'hamstring'], Glutes: ['glute', 'bridge'], Abs: ['ab', 'crunch', 'plank'], Core: ['situp', 'twist', 'core'] };
+            const map = { Chest: ['bench', 'chest', 'fly', 'pec'], Back: ['row', 'pull', 'lat', 'deadlift'], Triceps: ['tricep', 'skull', 'pushdown'], Biceps: ['bicep', 'curl', 'hammer'], Shoulders: ['shoulder', 'overhead', 'delt', 'landmine'], Quads: ['squat', 'leg press', 'quad'], Hamstrings: ['rdl', 'stiff', 'hamstring'], Glutes: ['glute', 'bridge'], Abs: ['ab', 'crunch', 'situp', 'plank'], Core: ['situp', 'twist', 'core'] };
             for (const [m, k] of Object.entries(map)) { if (k.some(kw => l.includes(kw))) return m; }
             return 'Full Body';
         };
@@ -134,6 +137,23 @@
             const [editHistId, setEditHistId] = React.useState(null);
             const [expandedDay, setExpandedDay] = React.useState(null);
             const audioRef = React.useRef(null);
+
+            // Calculation: Weekly Summary
+            const weeklyStats = React.useMemo(() => {
+                const start = new Date(); 
+                start.setDate(start.getDate() - start.getDay()); 
+                start.setHours(0,0,0,0);
+                const week = history.filter(h => h && h.timestamp && h.timestamp >= start.getTime());
+                const muscleVol = {}; 
+                let totalSets = 0;
+                week.forEach(w => { 
+                    totalSets += (w.sets || 0); 
+                    Object.entries(w.vol || {}).forEach(([m, c]) => {
+                        muscleVol[m] = (muscleVol[m] || 0) + c;
+                    });
+                });
+                return { workouts: week.length, sets: totalSets, muscles: muscleVol };
+            }, [history]);
 
             // Logic: Persistent Storage Sync
             React.useEffect(() => {
@@ -220,7 +240,7 @@
             const startMode = (m, i, s) => {
                 setTimerMode(m); setCurrIdx(i); setCurrSet(s);
                 setTimeLeft(m === 'WORK' ? timerSettings.work : m === 'REST_SET' ? timerSettings.restSet : timerSettings.restEx);
-                if (m === 'WORK') speak(`${exercises[i]?.name}. Work.`);
+                if (m === 'WORK') speak(`${exercises[i]?.name}. Go.`);
                 else if (m === 'REST_SET') speak(`Rest.`);
             };
 
@@ -285,7 +305,7 @@
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => setIsAudio(!isAudio)} className="p-3 bg-zinc-900 rounded-2xl text-zinc-500 border border-zinc-800 transition-colors">{isAudio ? <Volume2 size={20}/> : <VolumeX size={20}/>}</button>
-                                <button onClick={finishWorkout} className={`p-3 rounded-2xl border transition-all ${exercises.length > 0 ? 'bg-cyan-500 text-black border-cyan-400 shadow-lg shadow-cyan-500/20' : 'bg-zinc-900 text-zinc-800 border-zinc-800'}`}><Flag size={20} /></button>
+                                <button onClick={finishWorkout} className={`p-3 rounded-2xl border transition-all ${exercises.length > 0 ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-zinc-900 text-zinc-800 border-zinc-800'}`}><Flag size={20} /></button>
                             </div>
                         </div>
 
@@ -329,4 +349,202 @@
                                         </div>
 
                                         <div className="flex gap-4 h-28 px-1">
-                                            <button
+                                            <button onClick={() => handleTransition('PREV')} className="flex-1 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center text-zinc-700 border border-zinc-800 active:scale-90 transition-transform"><SkipBack size={36}/></button>
+                                            <button onClick={() => { setTimerActive(!timerActive); if(!isLive) setIsLive(true); enableAudioEngine(); }} className={`flex-[2.8] rounded-[2.5rem] flex items-center justify-center gap-4 font-black text-2xl active:scale-95 transition-all ${timerActive ? 'bg-zinc-800 text-white border border-zinc-700' : 'bg-white text-black shadow-2xl shadow-white/20'}`}>
+                                                {timerActive ? <Pause fill="currentColor" size={36}/> : <Play fill="currentColor" size={36}/>} {timerActive ? "PAUSE" : "START"}
+                                            </button>
+                                            <button onClick={() => handleTransition('NEXT')} className="flex-1 bg-zinc-900 rounded-[2.5rem] flex items-center justify-center text-zinc-700 border border-zinc-800 active:scale-90 transition-transform"><SkipForward size={36}/></button>
+                                        </div>
+
+                                        <div className="flex justify-between items-center px-8 py-5 bg-zinc-900/40 rounded-[2rem] border border-zinc-800/50 mx-1">
+                                            <div className="flex items-center gap-2">
+                                                <Award size={16} className="text-cyan-400" />
+                                                <span className="text-[11px] font-black uppercase">PB: {benchmarks[exercises[currIdx]?.name]?.w || '-'}KG</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 border-l border-zinc-800 pl-8">
+                                                <HistoryIcon size={16} className="text-amber-500" />
+                                                <span className="text-[11px] font-black uppercase tracking-tight">LAST: {benchmarks[exercises[currIdx]?.name]?.r || '-'} Reps</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 pt-12">
+                                            <div className="flex justify-between items-center px-2">
+                                                <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-700">Live Session Queue</h3>
+                                                <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: Array(4).fill(0).map(()=>createNewSet()) }])} className="text-cyan-500 text-[10px] font-black uppercase">+ ADD MOVE</button>
+                                            </div>
+                                            <div className="space-y-3">
+                                                {exercises.map((ex, i) => (
+                                                    <div key={ex.id} className={`tactile-card p-6 flex flex-col gap-4 transition-all ${currIdx === i ? 'border-cyan-500/50 bg-cyan-500/5 shadow-lg' : 'opacity-30'}`}>
+                                                        <div className="flex items-center gap-5">
+                                                            <div className="h-10 w-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-xs text-zinc-600">{i+1}</div>
+                                                            <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name:e.target.value}:x))} className="flex-1 bg-transparent border-none p-0 text-lg font-black focus:ring-0 text-white" />
+                                                            <div className="flex gap-2">
+                                                                <button onClick={() => { if (i === 0) return; const copy = [...exercises]; [copy[i-1], copy[i]] = [copy[i], copy[i-1]]; setExercises(copy); }} className="p-2.5 bg-zinc-900 rounded-xl"><ChevronUp size={18}/></button>
+                                                                <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="p-2.5 bg-zinc-900 rounded-xl text-red-900/40"><Trash2 size={18}/></button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-between items-center pl-14">
+                                                            <select value={ex.muscle} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, muscle:e.target.value}:x))} className="bg-zinc-800 text-cyan-400 text-[10px] font-black uppercase px-4 py-2 rounded-xl border-none outline-none">
+                                                                {MUSCLE_GROUPS.map(m => <option key={m} value={m}>{m}</option>)}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="py-40 text-center animate-in">
+                                        <div className="h-24 w-24 bg-zinc-900 rounded-[2.8rem] flex items-center justify-center mx-auto text-zinc-700 mb-8 border border-zinc-800 shadow-sm"><Dumbbell size={40}/></div>
+                                        <p className="text-zinc-500 font-black uppercase text-xs tracking-widest px-10">Load a Blueprint to begin</p>
+                                        <button onClick={() => setActiveTab('planner')} className="mt-10 px-8 py-4 bg-zinc-900 border border-zinc-800 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] active:bg-zinc-800 transition-colors">Training Calendar</button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* --- PLANNER TAB --- */}
+                        {activeTab === 'planner' && (
+                            <div className="space-y-6 animate-in pb-10">
+                                <h2 className="text-2xl font-black mb-8 px-2 tracking-tight">Training Calendar</h2>
+                                {['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'].map(d => (
+                                    <div key={d} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden mb-4 shadow-xl">
+                                        <div className="p-7 flex justify-between items-center" onClick={() => setExpandedDay(expandedDay === d ? null : d)}>
+                                            <div className="flex items-center gap-5">
+                                                <div className="p-4 bg-cyan-500/10 text-cyan-400 rounded-2xl shadow-inner"><LayoutGrid size={22}/></div>
+                                                <div><h3 className="font-bold text-xl leading-none">{d}</h3><p className="text-[11px] font-black text-zinc-500 uppercase mt-2 tracking-widest">{(planner[d] || {}).focus || 'Generic Plan'}</p></div>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <button onClick={(e) => { e.stopPropagation(); activatePlan(d); }} className="bg-white text-black text-[11px] font-black px-6 py-2.5 rounded-xl shadow-xl active:scale-95">LOAD</button>
+                                                <div className={`transition-transform duration-300 ${expandedDay === d ? 'rotate-180' : ''}`}><ChevronDown size={22} className="text-zinc-700"/></div>
+                                            </div>
+                                        </div>
+                                        {expandedDay === d && (
+                                            <div className="px-7 pb-8 pt-4 space-y-6 border-t border-zinc-800/50 animate-in">
+                                                <input value={(planner[d]||{}).focus} onChange={e => setPlanner({...planner, [d]: {...(planner[d]||{}), focus: e.target.value}})} placeholder="Focus (e.g. Hypertrophy Back)" className="w-full bg-black border border-zinc-800 rounded-2xl p-5 text-sm font-bold focus:ring-2 focus:ring-cyan-500 text-white shadow-inner" />
+                                                <div className="space-y-4">
+                                                    {(planner[d]?.exercises || []).map(ex => (
+                                                        <div key={ex.id} className="bg-black/50 p-5 rounded-3xl border border-zinc-800 flex items-center gap-4">
+                                                            <input value={ex.name} onChange={e => setPlanner({...planner, [d]: {...planner[d], exercises: planner[d].exercises.map(x=>x.id===ex.id?{...x, name:e.target.value}:x)}})} className="flex-1 bg-transparent border-none font-bold text-sm focus:ring-0 text-white shadow-inner" />
+                                                            <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: planner[d].exercises.filter(x => x.id !== ex.id)}})} className="text-zinc-800"><X size={18}/></button>
+                                                        </div>
+                                                    ))}
+                                                    <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: [...(planner[d].exercises || []), {id:Math.random().toString(36).substr(2,9), name:'New Move', muscle:'Full Body', completed:false, sets:Array(4).fill(0).map(()=>createNewSet())}]}})} className="w-full py-5 border border-dashed border-zinc-800 rounded-[2rem] text-xs font-black text-zinc-700 hover:text-cyan-400 shadow-inner">+ Add Move</button>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* --- TRAIN TAB --- */}
+                        {activeTab === 'program' && (
+                            <div className="space-y-6">
+                                <div className="px-1 flex flex-col gap-4">
+                                    <div className="flex items-center gap-3 bg-zinc-900/50 px-5 py-3 rounded-2xl border border-zinc-800 shadow-inner">
+                                        <Edit size={16} className="text-zinc-600" />
+                                        <input value={activeFocus} onChange={e => setActiveFocus(e.target.value)} placeholder="Session Focus Name..." className="bg-transparent border-none p-0 text-sm font-black uppercase tracking-widest text-zinc-200 focus:ring-0 w-full" />
+                                    </div>
+                                    <div className="flex justify-between items-center px-1 border-b border-zinc-900 pb-4">
+                                        <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Live Workspace</h2>
+                                        <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: Array(4).fill(0).map(()=>createNewSet()) }])} className="bg-cyan-500 text-black px-4 py-2.5 rounded-xl font-bold text-xs shadow-lg">+ Move</button>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    {exercises.map((ex) => (
+                                        <div key={ex.id} className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6">
+                                            <div className="flex justify-between items-center mb-4">
+                                                <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name: e.target.value}:x))} className="bg-transparent border-none font-black text-lg focus:ring-0" />
+                                                <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="text-red-900/30"><Trash2 size={16}/></button>
+                                            </div>
+                                            <div className="space-y-2">
+                                                {(ex.sets || []).map((s, i) => (
+                                                    <div key={s.id} className="grid grid-cols-12 gap-3 items-center">
+                                                        <div className="col-span-1 text-[10px] font-black text-zinc-700">{i+1}</div>
+                                                        <input type="number" value={s.weight} onChange={e => updateWeight(ex.id, s.id, e.target.value)} className="col-span-5 bg-zinc-950 border border-zinc-800 rounded-xl py-3 text-center font-black text-cyan-400" placeholder="KG" />
+                                                        <input type="number" value={s.reps} onChange={e => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.map(st => st.id === s.id ? {...st, reps: e.target.value} : st)} : x))} className="col-span-4 bg-zinc-950 border border-zinc-800 rounded-xl py-3 text-center font-black text-green-400" placeholder="Reps" />
+                                                        <button onClick={() => setExercises(exercises.map(x => x.id === ex.id ? {...x, sets: x.sets.filter(ts => ts.id !== s.id)} : x))} className="col-span-2 flex justify-center text-zinc-700"><X size={14}/></button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* --- REPORT TAB --- */}
+                        {activeTab === 'dashboard' && (
+                            <div className="space-y-8 animate-in pb-32">
+                                <div className="tactile-card p-9 shadow-2xl relative overflow-hidden group">
+                                    <Award className="absolute -right-4 -bottom-4 w-32 h-32 text-cyan-500/10 group-hover:scale-110 transition-transform" />
+                                    <h2 className="text-[11px] font-black text-cyan-400 uppercase tracking-[0.4em] mb-4 flex items-center gap-2"><div className="h-2 w-2 bg-cyan-500 rounded-full animate-pulse" /> Intelligence Center</h2>
+                                    <div className="grid grid-cols-2 gap-6 mb-10 text-center">
+                                        <div className="bg-black/50 p-7 rounded-[2.5rem] border border-zinc-800/50 shadow-inner"><div className="text-5xl font-black text-white leading-none">{history.length}</div><div className="text-[10px] font-bold text-zinc-600 uppercase mt-3 tracking-widest">Sessions</div></div>
+                                        <div className="bg-black/50 p-7 rounded-[2.5rem] border border-zinc-800/50 shadow-inner"><div className="text-5xl font-black text-white leading-none tracking-tighter">{Object.keys(benchmarks).length}</div><div className="text-[10px] font-bold text-zinc-600 uppercase mt-3 tracking-widest">PBs Held</div></div>
+                                    </div>
+                                    <button onClick={() => {
+                                        const data = { history, benchmarks, planner };
+                                        const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a'); a.href = url; a.download = `IronFocus_Backup.json`; a.click();
+                                    }} className="w-full flex items-center justify-center gap-3 py-5 bg-zinc-800 rounded-[2.2rem] font-black text-xs uppercase tracking-[0.2em] active:scale-95 shadow-xl border border-zinc-700/50"><Download size={20}/> Export Dataset</button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <h3 className="text-lg font-black px-4 flex items-center gap-3"><HistoryIcon size={20} className="text-cyan-400"/> Session Archive</h3>
+                                    {history.map(h => (
+                                        <div key={h.id} className="tactile-card p-8 flex flex-col gap-6 shadow-xl relative transition-all active:scale-[0.98]">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-[11px] font-black text-cyan-500 uppercase tracking-widest mb-1">{h.date}</div>
+                                                    <div className="text-2xl font-black line-clamp-1">{h.focus}</div>
+                                                    <div className="text-[10px] text-zinc-500 font-bold uppercase mt-2 tracking-widest">Dur: {formatSessionClock(h.dur || 0)} | {h.sets} Sets</div>
+                                                </div>
+                                                <button onClick={() => setHistory(history.filter(x=>x.id!==h.id))} className="p-3 bg-red-950/20 rounded-2xl text-red-900 active:scale-95 transition-transform shadow-lg"><Trash2 size={22}/></button>
+                                            </div>
+                                            <div className="pt-6 border-t border-zinc-800/50 space-y-4">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-[0.2em]">Volume Adjuster</span>
+                                                    {editHistId === h.id ? <button onClick={()=>setEditHistId(null)} className="text-cyan-400 text-[10px] font-black uppercase tracking-widest underline underline-offset-4">Save</button> : <button onClick={()=>setEditHistId(h.id)} className="text-zinc-500 text-[10px] font-black uppercase tracking-widest">Edit</button>}
+                                                </div>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {editHistId === h.id ? MUSCLE_GROUPS.map(m => (
+                                                        <div key={m} className="flex items-center bg-black/40 border border-zinc-800 rounded-xl px-4 py-2.5 gap-4 flex-1 min-w-[140px]">
+                                                            <span className="text-[9px] font-black uppercase text-zinc-500 flex-1">{m}</span>
+                                                            <button onClick={()=>{ setHistory(history.map(x => x.id === h.id ? {...x, vol: {...(x.vol||{}), [m]: Math.max(0, ((x.vol||{})[m]||0)-1)}, sets: Math.max(0, x.sets-1)} : x)); }} className="p-1 bg-zinc-800 rounded-lg text-red-500"><X size={10}/></button>
+                                                            <span className="text-xs font-black w-4 text-center">{h.vol ? h.vol[m] || 0 : 0}</span>
+                                                            <button onClick={()=>{ setHistory(history.map(x => x.id === h.id ? {...x, vol: {...(x.vol||{}), [m]: ((x.vol||{})[m]||0)+1}, sets: x.sets+1} : x)); }} className="p-1 bg-zinc-800 rounded-lg text-green-500"><Plus size={10}/></button>
+                                                        </div>
+                                                    )) : Object.entries(h.vol || {}).map(([m, c]) => c > 0 && (<div key={m} className="px-4 py-2 bg-black/60 rounded-xl text-[10px] font-black uppercase border border-zinc-800 text-zinc-500 shadow-sm">{m}: {c}</div>))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-md bg-zinc-900/90 backdrop-blur-3xl border border-zinc-800 rounded-[3.2rem] p-2 flex justify-between z-50 shadow-[0_-10px_60px_rgba(0,0,0,1)] ring-1 ring-white/10 pb-8 lg:pb-2">
+                        {[
+                            { id: 'program', icon: <Dumbbell />, label: 'TRAIN' },
+                            { id: 'timer', icon: <TimerIcon />, label: 'TIMER' },
+                            { id: 'planner', icon: <LayoutGrid />, label: 'PLAN' },
+                            { id: 'dashboard', icon: <HistoryIcon />, label: 'REPORT' },
+                        ].map((t) => (
+                            <button key={t.id} onClick={() => setActiveTab(t.id)} className={`flex-1 py-7 flex flex-col items-center rounded-[2.8rem] transition-all duration-300 ${activeTab === t.id ? 'text-cyan-400 bg-black border border-zinc-800 shadow-inner' : 'text-zinc-600'}`}>
+                                {t.icon}<span className="text-[9px] mt-1.5 uppercase font-black tracking-widest">{t.label}</span>
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

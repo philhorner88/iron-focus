@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>IronFocus Pro 16.5</title>
+    <title>IronFocus Pro 16.6</title>
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -136,6 +136,7 @@
             const [isAudio, setIsAudio] = React.useState(true);
             const [editHistId, setEditHistId] = React.useState(null);
             const [expandedDay, setExpandedDay] = React.useState(null);
+            const [bulk, setBulk] = React.useState({ show: false, target: 'active', input: '' });
             const audioRef = React.useRef(null);
 
             // Calculation: Weekly Summary
@@ -291,10 +292,53 @@
                 }));
             };
 
+            const handleBulkSubmit = () => {
+                const lines = bulk.input.split('\n').filter(l => l.trim() !== "");
+                const mapped = lines.map(n => ({ 
+                    id: Math.random().toString(36).substr(2,9), 
+                    name: n.trim(), 
+                    muscle: detectMuscle(n.trim()), 
+                    completed: false, 
+                    sets: Array(4).fill(0).map(() => createNewSet()) 
+                }));
+                
+                if (bulk.target === 'active') {
+                    setExercises([...exercises, ...mapped]);
+                } else {
+                    setPlanner({
+                        ...planner, 
+                        [bulk.target]: {
+                            ...planner[bulk.target], 
+                            exercises: [...(planner[bulk.target].exercises || []), ...mapped]
+                        }
+                    });
+                }
+                setBulk({ show: false, target: 'active', input: '' });
+            };
+
             const formatSessionClock = (s) => { const m = Math.floor(s/60); const sec = s%60; return `${m}:${sec.toString().padStart(2,'0')}`; };
 
             return (
                 <div className="min-h-screen bg-black text-white pb-40 safe-area-inset-bottom overflow-y-auto no-scrollbar">
+                    {/* --- BULK IMPORT MODAL --- */}
+                    {bulk.show && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-md animate-in px-4">
+                            <div className="bg-zinc-900 w-full max-w-md border border-zinc-800 rounded-[2.5rem] p-8 shadow-2xl">
+                                <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-cyan-400 font-mono"><ClipboardList /> Batch Import</h3>
+                                <p className="text-[10px] text-zinc-500 uppercase font-black mb-4 tracking-widest">Adding to: {bulk.target === 'active' ? 'Live Session' : bulk.target}</p>
+                                <textarea 
+                                    autoFocus 
+                                    value={bulk.input} 
+                                    onChange={e => setBulk({...bulk, input: e.target.value})} 
+                                    placeholder="Exercise names... One per line" 
+                                    className="w-full h-48 bg-black border border-zinc-800 rounded-2xl p-4 mb-4 outline-none text-white focus:ring-2 focus:ring-cyan-500" 
+                                />
+                                <button onClick={handleBulkSubmit} className="w-full bg-cyan-500 text-black font-black py-5 rounded-2xl active:scale-95 shadow-lg uppercase tracking-widest text-sm">Inject moves</button>
+                                <button onClick={() => setBulk({...bulk, show: false})} className="w-full mt-2 py-4 text-zinc-600 font-bold text-sm uppercase tracking-widest">Cancel</button>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="max-w-xl mx-auto px-5 pt-8 animate-in">
                         
                         {/* --- HUD --- */}
@@ -305,7 +349,7 @@
                             </div>
                             <div className="flex gap-2">
                                 <button onClick={() => setIsAudio(!isAudio)} className="p-3 bg-zinc-900 rounded-2xl text-zinc-500 border border-zinc-800 transition-colors">{isAudio ? <Volume2 size={20}/> : <VolumeX size={20}/>}</button>
-                                <button onClick={finishWorkout} className={`p-3 rounded-2xl border transition-all ${exercises.length > 0 ? 'bg-cyan-500 text-black border-cyan-400' : 'bg-zinc-900 text-zinc-800 border-zinc-800'}`}><Flag size={20} /></button>
+                                <button onClick={finishWorkout} className={`p-3 rounded-2xl border transition-all ${exercises.length > 0 ? 'bg-cyan-500 text-black border-cyan-400 shadow-lg shadow-cyan-500/20' : 'bg-zinc-900 text-zinc-800 border-zinc-800'}`}><Flag size={20} /></button>
                             </div>
                         </div>
 
@@ -370,7 +414,10 @@
                                         <div className="space-y-4 pt-12">
                                             <div className="flex justify-between items-center px-2">
                                                 <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-zinc-700">Live Session Queue</h3>
-                                                <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: Array(4).fill(0).map(()=>createNewSet()) }])} className="text-cyan-500 text-[10px] font-black uppercase">+ ADD MOVE</button>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setBulk({ show: true, target: 'active', input: '' })} className="text-zinc-500 p-2 bg-zinc-900 border border-zinc-800 rounded-xl active:scale-95"><ClipboardList size={16}/></button>
+                                                    <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: Array(4).fill(0).map(()=>createNewSet()) }])} className="text-cyan-500 text-[10px] font-black uppercase">+ ADD MOVE</button>
+                                                </div>
                                             </div>
                                             <div className="space-y-3">
                                                 {exercises.map((ex, i) => (
@@ -379,7 +426,7 @@
                                                             <div className="h-10 w-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center font-black text-xs text-zinc-600">{i+1}</div>
                                                             <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name:e.target.value}:x))} className="flex-1 bg-transparent border-none p-0 text-lg font-black focus:ring-0 text-white" />
                                                             <div className="flex gap-2">
-                                                                <button onClick={() => { if (i === 0) return; const copy = [...exercises]; [copy[i-1], copy[i]] = [copy[i], copy[i-1]]; setExercises(copy); }} className="p-2.5 bg-zinc-900 rounded-xl"><ChevronUp size={18}/></button>
+                                                                <button onClick={() => { if (i === 0) return; const copy = [...exercises]; [copy[i-1], copy[i]] = [copy[i], copy[i-1]]; setExercises(copy); }} className="p-2.5 bg-zinc-800 rounded-xl"><ChevronUp size={18}/></button>
                                                                 <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="p-2.5 bg-zinc-900 rounded-xl text-red-900/40"><Trash2 size={18}/></button>
                                                             </div>
                                                         </div>
@@ -411,7 +458,7 @@
                                     <div key={d} className="bg-zinc-900 border border-zinc-800 rounded-[2.5rem] overflow-hidden mb-4 shadow-xl">
                                         <div className="p-7 flex justify-between items-center" onClick={() => setExpandedDay(expandedDay === d ? null : d)}>
                                             <div className="flex items-center gap-5">
-                                                <div className="p-4 bg-cyan-500/10 text-cyan-400 rounded-2xl shadow-inner"><LayoutGrid size={22}/></div>
+                                                <div className={`p-4 bg-cyan-500/10 text-cyan-400 rounded-2xl shadow-inner`}><LayoutGrid size={22}/></div>
                                                 <div><h3 className="font-bold text-xl leading-none">{d}</h3><p className="text-[11px] font-black text-zinc-500 uppercase mt-2 tracking-widest">{(planner[d] || {}).focus || 'Generic Plan'}</p></div>
                                             </div>
                                             <div className="flex items-center gap-4">
@@ -423,10 +470,14 @@
                                             <div className="px-7 pb-8 pt-4 space-y-6 border-t border-zinc-800/50 animate-in">
                                                 <input value={(planner[d]||{}).focus} onChange={e => setPlanner({...planner, [d]: {...(planner[d]||{}), focus: e.target.value}})} placeholder="Focus (e.g. Hypertrophy Back)" className="w-full bg-black border border-zinc-800 rounded-2xl p-5 text-sm font-bold focus:ring-2 focus:ring-cyan-500 text-white shadow-inner" />
                                                 <div className="space-y-4">
+                                                    <div className="flex justify-between items-center px-1">
+                                                        <span className="text-[10px] font-black text-zinc-600 uppercase tracking-widest px-1">Base Routine</span>
+                                                        <button onClick={() => setBulk({ show: true, target: d, input: '' })} className="text-cyan-400 text-[10px] font-black uppercase flex items-center gap-1.5"><ClipboardList size={14}/> Batch</button>
+                                                    </div>
                                                     {(planner[d]?.exercises || []).map(ex => (
                                                         <div key={ex.id} className="bg-black/50 p-5 rounded-3xl border border-zinc-800 flex items-center gap-4">
                                                             <input value={ex.name} onChange={e => setPlanner({...planner, [d]: {...planner[d], exercises: planner[d].exercises.map(x=>x.id===ex.id?{...x, name:e.target.value}:x)}})} className="flex-1 bg-transparent border-none font-bold text-sm focus:ring-0 text-white shadow-inner" />
-                                                            <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: planner[d].exercises.filter(x => x.id !== ex.id)}})} className="text-zinc-800"><X size={18}/></button>
+                                                            <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: (planner[d].exercises || []).filter(x => x.id !== ex.id)}})} className="text-zinc-800"><X size={18}/></button>
                                                         </div>
                                                     ))}
                                                     <button onClick={() => setPlanner({...planner, [d]: {...planner[d], exercises: [...(planner[d].exercises || []), {id:Math.random().toString(36).substr(2,9), name:'New Move', muscle:'Full Body', completed:false, sets:Array(4).fill(0).map(()=>createNewSet())}]}})} className="w-full py-5 border border-dashed border-zinc-800 rounded-[2rem] text-xs font-black text-zinc-700 hover:text-cyan-400 shadow-inner">+ Add Move</button>
@@ -448,14 +499,17 @@
                                     </div>
                                     <div className="flex justify-between items-center px-1 border-b border-zinc-900 pb-4">
                                         <h2 className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Live Workspace</h2>
-                                        <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: Array(4).fill(0).map(()=>createNewSet()) }])} className="bg-cyan-500 text-black px-4 py-2.5 rounded-xl font-bold text-xs shadow-lg">+ Move</button>
+                                        <div className="flex gap-2">
+                                            <button onClick={() => setBulk({ show: true, target: 'active', input: '' })} className="p-2.5 bg-zinc-900 rounded-xl border border-zinc-800 text-zinc-400 active:scale-95"><ClipboardList size={18}/></button>
+                                            <button onClick={() => setExercises(p => [...p, { id: Math.random().toString(36).substr(2,9), name: 'New Move', muscle: 'Full Body', completed: false, sets: Array(4).fill(0).map(()=>createNewSet()) }])} className="bg-cyan-500 text-black px-4 py-2.5 rounded-xl font-bold text-xs shadow-lg">+ Move</button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
                                     {exercises.map((ex) => (
                                         <div key={ex.id} className="bg-zinc-900/40 border border-zinc-800 rounded-3xl p-6">
                                             <div className="flex justify-between items-center mb-4">
-                                                <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name: e.target.value}:x))} className="bg-transparent border-none font-black text-lg focus:ring-0" />
+                                                <input value={ex.name} onChange={e => setExercises(exercises.map(x=>x.id===ex.id?{...x, name: e.target.value}:x))} className="bg-transparent border-none font-black text-lg focus:ring-0 text-white" />
                                                 <button onClick={() => setExercises(exercises.filter(x => x.id !== ex.id))} className="text-red-900/30"><Trash2 size={16}/></button>
                                             </div>
                                             <div className="space-y-2">
@@ -493,13 +547,13 @@
                                 </div>
 
                                 <div className="space-y-6">
-                                    <h3 className="text-lg font-black px-4 flex items-center gap-3"><HistoryIcon size={20} className="text-cyan-400"/> Session Archive</h3>
+                                    <h3 className="text-lg font-black px-4 flex items-center gap-3"><HistoryIcon size={20} className="text-cyan-400"/> Training Archive</h3>
                                     {history.map(h => (
                                         <div key={h.id} className="tactile-card p-8 flex flex-col gap-6 shadow-xl relative transition-all active:scale-[0.98]">
                                             <div className="flex justify-between items-center">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="text-[11px] font-black text-cyan-500 uppercase tracking-widest mb-1">{h.date}</div>
-                                                    <div className="text-2xl font-black line-clamp-1">{h.focus}</div>
+                                                    <div className="text-2xl font-black line-clamp-1 text-white">{h.focus}</div>
                                                     <div className="text-[10px] text-zinc-500 font-bold uppercase mt-2 tracking-widest">Dur: {formatSessionClock(h.dur || 0)} | {h.sets} Sets</div>
                                                 </div>
                                                 <button onClick={() => setHistory(history.filter(x=>x.id!==h.id))} className="p-3 bg-red-950/20 rounded-2xl text-red-900 active:scale-95 transition-transform shadow-lg"><Trash2 size={22}/></button>
